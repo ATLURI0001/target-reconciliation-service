@@ -1,0 +1,54 @@
+package httpapi
+
+import (
+	"context"
+	"github.com/ATLURI0001/resilienceplane/internal/core"
+	"github.com/ATLURI0001/resilienceplane/internal/store"
+	"net/http/httptest"
+	"strings"
+	"testing"
+)
+
+func TestAPIAuthenticationAndAuditedAuthorization(t *testing.T) {
+	s := core.NewService(store.NewMemory())
+	op := strings.Repeat("o", 32)
+	view := strings.Repeat("v", 32)
+	a, e := New(s, op, view)
+	if e != nil {
+		t.Fatal(e)
+	}
+	h := a.Handler()
+	for _, tc := range []struct {
+		method, path, body, token string
+		want                      int
+	}{
+		{"GET", "/healthz", "", "", 200}, {"GET", "/v1/snapshot", "", "", 401}, {"POST", "/v1/clusters", `{"id":"local","environment":"test"}`, view, 403}, {"POST", "/v1/clusters", `{"id":"local","environment":"test"}`, op, 200}, {"GET", "/v1/snapshot", "", view, 200}, {"POST", "/v1/clusters", `{"id":"bad","environment":"test","role":"operator"}`, op, 400}, {"POST", "/v1/clusters", `{"id":"bad","environment":"test"}garbage`, op, 400},
+	} {
+		r := httptest.NewRequest(tc.method, tc.path, strings.NewReader(tc.body))
+		if tc.token != "" {
+			r.Header.Set("Authorization", "Bearer "+tc.token)
+		}
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, r)
+		if w.Code != tc.want {
+			t.Fatalf("%s %s got %d %s", tc.method, tc.path, w.Code, w.Body)
+		}
+	}
+	st, _ := s.Store.View(context.Background())
+	if len(st.Clusters) != 1 || len(st.Audit) != 2 || st.Audit[0].Result != "denied" {
+		t.Fatal(st)
+	}
+}
+func TestBoundedAPIAndInvalidTokens(t *testing.T) {
+	s := core.NewService(store.NewMemory())
+	a, _ := New(s, strings.Repeat("o", 32), strings.Repeat("v", 32))
+	a.tokens = 0
+	w := httptest.NewRecorder()
+	a.Handler().ServeHTTP(w, httptest.NewRequest("GET", "/healthz", nil))
+	if w.Code != 429 {
+		t.Fatal(w.Code)
+	}
+	if _, e := New(s, "short", "short"); e == nil {
+		t.Fatal("weak tokens")
+	}
+}

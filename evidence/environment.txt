@@ -1,0 +1,5 @@
+go version go1.27.4 linux/amd64
+Linux x86_64
+Python 3.12.14
+Reported logical CPUs 9
+Benchmark fixed GOMAXPROCS=2; shared virtual runtime, no dedicated hardware claim

@@ -1,0 +1,14 @@
+.git
+.env
+.tools
+node_modules
+web/node_modules
+evidence
+*.zip
+
+.env.*
+!.env.example
+bin
+web/.next
+web/*.txt
+**/__pycache__

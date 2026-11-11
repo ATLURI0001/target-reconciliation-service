@@ -1,0 +1,6 @@
+apiVersion: v2
+name: resilienceplane
+description: Experimental namespace-scoped reliability workflow control plane
+type: application
+version: 0.1.0
+appVersion: 0.1.0-dev

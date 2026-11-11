@@ -1,0 +1,7 @@
+Checking .tools/prometheus-local-check.yaml
+  SUCCESS: 1 rule files found
+ SUCCESS: .tools/prometheus-local-check.yaml is valid prometheus config file syntax
+
+Checking /workspace/scratch/38d2eb11c8fe/resilienceplane/observability/prometheus/rules.yaml
+  SUCCESS: 4 rules found
+

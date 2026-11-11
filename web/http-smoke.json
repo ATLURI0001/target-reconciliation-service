@@ -1,0 +1,23 @@
+[
+  {
+    "path": "/",
+    "method": "GET",
+    "status": 200,
+    "expected": 200,
+    "passed": true
+  },
+  {
+    "path": "/api/snapshot",
+    "method": "GET",
+    "status": 401,
+    "expected": 401,
+    "passed": true
+  },
+  {
+    "path": "/api/snapshot",
+    "method": "POST",
+    "status": 405,
+    "expected": 405,
+    "passed": true
+  }
+]

@@ -1,0 +1,45 @@
+rule_files:
+  - rules.yaml
+evaluation_interval: 10s
+tests:
+  - name: stale telemetry is distinct from missing scrape target
+    interval: 10s
+    input_series:
+      - series: resilienceplane_cluster_last_seen_seconds{cluster="local"}
+        values: 0+0x10
+      - series: up{job="resilienceplane"}
+        values: 1+0x10
+    alert_rule_test:
+      - eval_time: 40s
+        alertname: ResiliencePlaneTelemetryStale
+        exp_alerts: []
+      - eval_time: 1m
+        alertname: ResiliencePlaneTelemetryStale
+        exp_alerts:
+          - exp_labels:
+              cluster: local
+              severity: warning
+            exp_annotations:
+              summary: Cluster telemetry is stale under the default 30-second freshness policy
+              description: This is an observation gap, not evidence that the cluster or workload is unavailable. Update this alert if policy freshness changes.
+      - eval_time: 1m
+        alertname: ResiliencePlaneAPIUnavailable
+        exp_alerts: []
+  - name: unavailable scrape target alerts after its hold
+    interval: 10s
+    input_series:
+      - series: up{job="resilienceplane"}
+        values: 0+0x10
+    alert_rule_test:
+      - eval_time: 20s
+        alertname: ResiliencePlaneAPIUnavailable
+        exp_alerts: []
+      - eval_time: 40s
+        alertname: ResiliencePlaneAPIUnavailable
+        exp_alerts:
+          - exp_labels:
+              job: resilienceplane
+              severity: warning
+            exp_annotations:
+              summary: Control-plane metrics cannot be scraped
+              description: Check API process and network before interpreting missing workload telemetry.

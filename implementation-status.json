@@ -1,0 +1,232 @@
+{
+  "schemaVersion": 1,
+  "project": "ResiliencePlane",
+  "version": "0.1.0-dev",
+  "updated": "2026-11-11",
+  "brand": "provisional: exact searches inconclusive; no uniqueness claim",
+  "publication": {
+    "remoteCreated": false,
+    "codePublished": false,
+    "cloudProvisioned": false,
+    "taggedRelease": false
+  },
+  "milestone": "Initial control-plane vertical slice implemented and integration-tested; live pod recovery blocked",
+  "allowedStatuses": [
+    "implemented",
+    "partially implemented",
+    "planned",
+    "blocked"
+  ],
+  "deliverables": [
+    {
+      "id": 1,
+      "name": "Go control-plane service",
+      "status": "implemented",
+      "evidenceOrBoundary": "Management API and transactional reliability service; test-only alpha scope"
+    },
+    {
+      "id": 2,
+      "name": "Kubernetes CRDs and controllers",
+      "status": "implemented",
+      "evidenceOrBoundary": "ReliabilityTarget, uncached observations, namespace-scoped rollback and actual API integration"
+    },
+    {
+      "id": 3,
+      "name": "Secure managed-cluster agents",
+      "status": "planned",
+      "evidenceOrBoundary": "Outbound mTLS enrollment/protocol/reconnection absent"
+    },
+    {
+      "id": 4,
+      "name": "API and management CLI",
+      "status": "implemented",
+      "evidenceOrBoundary": "Local-token API and rpctl; alpha endpoint scope"
+    },
+    {
+      "id": 5,
+      "name": "API-backed dashboard",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Read-only real API console; subset of required pages"
+    },
+    {
+      "id": 6,
+      "name": "PostgreSQL schema and migration",
+      "status": "implemented",
+      "evidenceOrBoundary": "JSONB aggregate plus relational audit mirror; deliberate serialized prototype"
+    },
+    {
+      "id": 7,
+      "name": "Event messaging",
+      "status": "planned",
+      "evidenceOrBoundary": "No NATS/outbox/consumers yet"
+    },
+    {
+      "id": 8,
+      "name": "Docker and local environments",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Configuration supplied; runtime build/Compose/Kind blocked by absent Docker daemon"
+    },
+    {
+      "id": 9,
+      "name": "Kubernetes manifests and Helm",
+      "status": "implemented",
+      "evidenceOrBoundary": "CRD, scoped Role, sample deployment and chart lint/render; chart runtime not validated"
+    },
+    {
+      "id": 10,
+      "name": "Jenkins pipeline",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Validation/scanning/build/SBOM source; no actual Jenkins execution/publication"
+    },
+    {
+      "id": 11,
+      "name": "Argo CD GitOps",
+      "status": "planned",
+      "evidenceOrBoundary": "Ownership exclusion implemented; delivery integration absent"
+    },
+    {
+      "id": 12,
+      "name": "Terraform modules",
+      "status": "planned",
+      "evidenceOrBoundary": "No paid resources provisioned; AWS first path pending"
+    },
+    {
+      "id": 13,
+      "name": "Ansible automation",
+      "status": "planned",
+      "evidenceOrBoundary": "No unverified host automation scaffolds"
+    },
+    {
+      "id": 14,
+      "name": "Prometheus monitoring",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Live metric endpoint, config, validated alert semantics; scrape runtime pending"
+    },
+    {
+      "id": 15,
+      "name": "Grafana dashboards",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Provisioned actual-metric dashboard; runtime UI not verified"
+    },
+    {
+      "id": 16,
+      "name": "ELK logging",
+      "status": "planned",
+      "evidenceOrBoundary": "JSON application logs only; collector/Logstash/Elasticsearch/Kibana absent"
+    },
+    {
+      "id": 17,
+      "name": "Reference microservices and traffic",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Single sample Nginx Deployment; multi-service reference application absent"
+    },
+    {
+      "id": 18,
+      "name": "Controlled resilience demonstrations",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Real API/PG workflow and guarded lab fault script; live pods/two-cluster/chaos not demonstrated"
+    },
+    {
+      "id": 19,
+      "name": "Automated tests and verification",
+      "status": "implemented",
+      "evidenceOrBoundary": "Initial slice unit/race/PG/real Kubernetes API/console/Helm/Prometheus checks; evidence scoped per report"
+    },
+    {
+      "id": 20,
+      "name": "Security and audit",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Local RBAC/policy/fencing/audit implemented; production OIDC/mTLS/tenancy/supply-chain controls pending"
+    },
+    {
+      "id": 21,
+      "name": "Architecture and operational documentation",
+      "status": "implemented",
+      "evidenceOrBoundary": "Initial boundaries, ADRs, threat model, API, runbooks, performance/release and continuation records"
+    },
+    {
+      "id": 22,
+      "name": "GitHub community and release assets",
+      "status": "partially implemented",
+      "evidenceOrBoundary": "Apache2/community/templates/Jenkins prepared; no remote, release or tag"
+    }
+  ],
+  "phases": [
+    {
+      "id": 0,
+      "name": "Research and architecture",
+      "status": "implemented"
+    },
+    {
+      "id": 1,
+      "name": "Executable foundation",
+      "status": "implemented"
+    },
+    {
+      "id": 2,
+      "name": "Kubernetes-native core",
+      "status": "partially implemented"
+    },
+    {
+      "id": 3,
+      "name": "Reliability workflow",
+      "status": "partially implemented"
+    },
+    {
+      "id": 4,
+      "name": "DevOps delivery",
+      "status": "partially implemented"
+    },
+    {
+      "id": 5,
+      "name": "Observability",
+      "status": "partially implemented"
+    },
+    {
+      "id": 6,
+      "name": "Management console",
+      "status": "partially implemented"
+    },
+    {
+      "id": 7,
+      "name": "Infrastructure automation",
+      "status": "planned"
+    },
+    {
+      "id": 8,
+      "name": "Multi-cluster resilience",
+      "status": "planned"
+    },
+    {
+      "id": 9,
+      "name": "Security, scale and release",
+      "status": "partially implemented"
+    }
+  ],
+  "blockedValidation": [
+    "Docker image/Compose runtime",
+    "Live Kind workload rollout and request recovery",
+    "Two-cluster failover",
+    "Jenkins/GitHub/Argo CD end-to-end delivery",
+    "Grafana runtime and browser visual inspection",
+    "Full source-callgraph vulnerability scan (resource termination)"
+  ],
+  "nextMilestone": "Fresh developer-machine Docker/Kind lab: real failed workload, denied mutation, approved rollback, observed readiness and console timeline; record request health/RTO separately",
+  "statusReport": "docs/verification.md",
+  "continuation": "docs/development-progress.md",
+  "verification": {
+    "goBuild": "passed",
+    "raceSuiteWithRealPostgreSQLAndKubernetesAPI": "passed",
+    "topLevelTests": 30,
+    "integrationSkips": 0,
+    "httpCLIAndNextProxy": "passed",
+    "databaseBackupRestore": "passed",
+    "helmLintRender": "passed",
+    "prometheusRuleValidation": "passed",
+    "consoleBuildTypecheckModelTests": "passed",
+    "goBinaryVulnerabilityScan": "no vulnerabilities reported",
+    "npmProductionAudit": "0 reported vulnerabilities",
+    "sourceCallgraphScan": "blocked: resource termination",
+    "livePodsAndDocker": "blocked: runtime absent"
+  }
+}

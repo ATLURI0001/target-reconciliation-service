@@ -1,0 +1,3 @@
+mkdir -p bin
+../.tools/current/go/bin/go build -trimpath -o bin/resilienceplane ./cmd/resilienceplane
+../.tools/current/go/bin/go build -trimpath -o bin/rpctl ./cmd/rpctl

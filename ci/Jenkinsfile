@@ -1,0 +1,23 @@
+pipeline {
+  agent { label 'resilienceplane-build' }
+  options { timeout(time: 25, unit: 'MINUTES'); disableConcurrentBuilds() }
+  environment { IMAGE = "resilienceplane:ci-${BUILD_NUMBER}" }
+  stages {
+    stage('Checkout') { steps { checkout scm } }
+    stage('Prerequisites') { steps { sh 'go version && docker version && helm version && trivy --version && syft version' } }
+    stage('Validate') { steps { sh 'make lint && make race && make helm' } }
+    stage('Dependency and secret scan') {
+      steps { sh 'trivy fs --scanners vuln,secret --exit-code 1 --severity HIGH,CRITICAL .' }
+    }
+    stage('Build image') { steps { sh 'docker build --tag "$IMAGE" .' } }
+    stage('Image scan and SBOM') {
+      steps {
+        sh 'trivy image --exit-code 1 --severity HIGH,CRITICAL "$IMAGE"'
+        sh 'mkdir -p artifacts && syft "$IMAGE" -o spdx-json=artifacts/sbom.spdx.json'
+      }
+    }
+  }
+  post {
+    always { archiveArtifacts artifacts: 'artifacts/*', allowEmptyArchive: true }
+  }
+}

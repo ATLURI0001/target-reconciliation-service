@@ -1,0 +1,2 @@
+HISTORICAL SCAN: earlier dependency/build selection; not the final manifest.
+signal: killed

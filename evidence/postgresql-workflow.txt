@@ -1,0 +1,12 @@
+Date: 2026-11-11 UTC
+Runtime: Debian 13 amd64, Go 1.25.5, PostgreSQL 17.11
+Command: TEST_DATABASE_URL=postgres://agent@127.0.0.1:55432/postgres?sslmode=disable go test -race -v ./tests -run TestPostgresWorkflow
+
+=== RUN   TestPostgresWorkflow
+    workflow_postgres_test.go:146: actual PostgreSQL workflow resolved incident; stable execution key across reconstructed service; denied viewer approval audited
+--- PASS: TestPostgresWorkflow (0.06s)
+PASS
+ok  github.com/ATLURI0001/resilienceplane/tests 1.077s
+
+Verified against actual PostgreSQL: cluster registration, policy persistence, incident detection, rejected viewer approval with durable audit, operator approval, execution claim, reconstructed service with new connection pool, stable durable execution key on replay, Verifying transition, observation-based verification and Resolved state visible through the original pool.
+Observations were synthetic inputs. No actual Kubernetes mutation or rollout was performed by this test. Reconstructing a service tests persisted restart state but is not process-kill fault injection. PostgreSQL ran with loopback-only trust auth in disposable scratch and stopped after the test.

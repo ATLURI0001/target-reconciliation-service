@@ -1,0 +1,158 @@
+openapi: 3.1.0
+info:
+  title: ResiliencePlane local management API
+  version: 0.1.0-dev
+  description: Development operator/viewer identities; test clusters only. No public execution or telemetry endpoint.
+servers:
+  - url: http://127.0.0.1:8080
+security:
+  - bearerAuth: []
+paths:
+  /healthz:
+    get:
+      security: []
+      responses:
+        '200': {description: Process responding}
+  /readyz:
+    get:
+      security: []
+      responses:
+        '200': {description: Durable store readable}
+        '503': {description: Durable store unavailable}
+  /metrics:
+    get:
+      security: []
+      responses:
+        '200': {description: Prometheus counters and observed replica gauges; local/private access only}
+  /v1/snapshot:
+    get:
+      summary: Current aggregate with latest 200 audit entries
+      responses:
+        '200':
+          description: Cluster connectivity is derived from lastSeen and policy freshness. No telemetry is never healthy.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [clusters, observations, incidents, audit, policy]
+                properties:
+                  clusters: {type: object, additionalProperties: {$ref: '#/components/schemas/Cluster'}}
+                  observations: {type: object, description: Keyed by cluster/namespace/deployment; see Go Observation schema}
+                  unhealthySince: {type: object, additionalProperties: {type: string, format: date-time}}
+                  incidents: {type: object, additionalProperties: {$ref: '#/components/schemas/Incident'}}
+                  audit: {type: array, maxItems: 200, items: {$ref: '#/components/schemas/Audit'}}
+                  policy: {$ref: '#/components/schemas/Policy'}
+        '401': {description: Invalid or missing bearer credentials}
+  /v1/audit:
+    get:
+      summary: Ordered audit pagination by immutable sequence
+      parameters:
+        - {in: query, name: cursor, schema: {type: integer, minimum: 0, default: 0}}
+        - {in: query, name: limit, schema: {type: integer, minimum: 1, maximum: 200, default: 100}}
+      responses:
+        '200':
+          description: Items with sequence greater than cursor; use nextCursor for subsequent page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: {type: array, items: {$ref: '#/components/schemas/Audit'}}
+                  nextCursor: {type: integer}
+        '400': {description: Invalid limit or cursor}
+  /v1/clusters:
+    post:
+      summary: Register or update a test cluster (operator)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [id, environment]
+              properties:
+                id: {type: string, maxLength: 63, pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'}
+                environment: {const: test}
+      responses:
+        '200': {description: Registered; no health assumed}
+        '400': {description: Invalid test-cluster registration}
+        '403': {description: Denied and audited}
+  /v1/policy:
+    put:
+      summary: Atomically replace safety policy (operator)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/Policy'}
+      responses:
+        '200': {description: Policy persisted and audited}
+        '400': {description: Invalid policy}
+        '403': {description: Denied and audited}
+  /v1/incidents/{id}/approve:
+    post:
+      summary: Explicit approval after current policy/evidence re-evaluation (operator)
+      parameters:
+        - {$ref: '#/components/parameters/IncidentID'}
+      responses:
+        '200': {description: Approved or dry-run decision recorded; no health guarantee}
+        '403': {description: Identity or safety policy denied; audit committed}
+        '404': {description: Unknown incident}
+        '409': {description: Incident is not awaiting approval or dry-run}
+  /v1/incidents/{id}/cancel:
+    post:
+      summary: Cancel future processing; in-flight Kubernetes requests cannot be retracted (operator)
+      parameters:
+        - {$ref: '#/components/parameters/IncidentID'}
+      responses:
+        '200': {description: Cancellation persisted and audited}
+        '403': {description: Denied and audited}
+        '409': {description: Terminal incident cannot change}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, description: Private random local development token; OIDC planned}
+  parameters:
+    IncidentID: {in: path, name: id, required: true, schema: {type: string}}
+  schemas:
+    Cluster:
+      type: object
+      properties:
+        id: {type: string}
+        environment: {const: test}
+        lastSeen: {type: string, format: date-time}
+        connected: {type: boolean}
+    Policy:
+      type: object
+      additionalProperties: false
+      required: [namespaces, maxReplicas, maxConcurrent, freshnessSeconds, detectionSeconds, dryRun, emergencyStop]
+      properties:
+        namespaces: {type: array, minItems: 1, items: {type: string, description: Protected namespaces are rejected; controller currently restricted to rp-demo}}
+        maxReplicas: {type: integer, minimum: 1}
+        maxConcurrent: {type: integer, minimum: 1, maximum: 10}
+        freshnessSeconds: {type: integer, minimum: 5, maximum: 300}
+        detectionSeconds: {type: integer, minimum: 1, maximum: 86400}
+        dryRun: {type: boolean, default: true}
+        emergencyStop: {type: boolean, default: false}
+    Incident:
+      type: object
+      properties:
+        id: {type: string}
+        target: {type: string}
+        state: {enum: [AwaitingApproval, DryRun, Approved, Executing, Verifying, Resolved, Rejected, Failed, Cancelled]}
+        plan: {type: object, description: Evidence snapshot, rollback image, reasoning, approval, verification and abort conditions}
+        created: {type: string, format: date-time}
+        updated: {type: string, format: date-time}
+        approvedBy: {type: string}
+        executionKey: {type: string}
+        deadline: {type: string, format: date-time}
+        error: {type: string}
+    Audit:
+      type: object
+      properties:
+        sequence: {type: integer, minimum: 1}
+        at: {type: string, format: date-time}
+        actor: {type: string}
+        action: {type: string}
+        resource: {type: string}
+        result: {type: string}

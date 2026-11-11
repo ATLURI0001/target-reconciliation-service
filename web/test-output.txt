@@ -1,0 +1,18 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> resilienceplane-console@0.1.0-dev test
+> node --experimental-strip-types --test tests/*.test.mjs
+
+✔ freshness rejects invalid and implausibly future timestamps (0.728359ms)
+✔ stale connectivity never appears healthy (0.139651ms)
+✔ workload requires fresh, available, updated and observed generation evidence (0.181003ms)
+✔ terminal and dry-run incidents are excluded from active count (0.211439ms)
+✔ transport rejects malformed policy and accepts empty authoritative state (0.571562ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 116.61546

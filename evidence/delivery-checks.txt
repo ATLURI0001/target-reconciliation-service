@@ -1,0 +1,10 @@
+Helm 3.17.3 official archive checksum matched.
+helm lint: 1 chart linted, 0 failed.
+helm template: 9 Kubernetes objects (including CRD) rendered and parsed.
+Rendered Role scope restricted to rp-demo, no wildcard resource or verbs.
+bash -n scripts/init-local.sh scripts/doctor.sh: PASS.
+Compose, Kind, issue templates: YAML parser PASS (not runtime validation).
+Local credential initialization: mode 0600, four distinct random 32-byte tokens/passwords (including Grafana), idempotent rerun PASS.
+Docker builds/runtime, Kubernetes admission/runtime, Jenkins execution: BLOCKED; tools/daemon absent.
+
+Observability extension: Prometheus 3.13.5 archive matched official SHA256. promtool check rules: PASS, 4 rules. promtool test rules: PASS, 2 scenarios. promtool check config: PASS with container rule path rewritten to actual host path. Original mounted configuration is not runtime-tested. Compose+provisioning YAML and six-panel dashboard JSON parsed. Local credential upgrade adds missing Grafana password without rotating existing credentials: PASS. Docker/Grafana runtime integration remains BLOCKED.

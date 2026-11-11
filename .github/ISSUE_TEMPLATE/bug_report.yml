@@ -1,0 +1,25 @@
+name: Bug report
+description: Report reproducible incorrect behavior
+title: "bug: "
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction and commands
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Version, OS, Kubernetes, and deployment profile
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted logs and evidence
+      description: Never include credentials, kubeconfigs, or private infrastructure state.

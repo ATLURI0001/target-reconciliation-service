@@ -1,0 +1,10 @@
+FOUND git        /usr/local/bin/git
+FOUND go         /usr/bin/go
+Go: Unknown option: version
+Go toolchain is not usable; GNU Go is not the Go compiler.
+MISSING docker     Install Docker Engine or Docker Desktop with Compose v2.
+MISSING kubectl    https://kubernetes.io/docs/tasks/tools/
+MISSING kind       https://kind.sigs.k8s.io/docs/user/quick-start/
+MISSING helm       Helm 3: https://helm.sh/docs/intro/install/
+FOUND python3    /opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3
+Linux/macOS: native tools. Windows: run these scripts inside WSL2 with Docker integration.

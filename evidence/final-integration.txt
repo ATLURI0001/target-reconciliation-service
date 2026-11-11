@@ -1,0 +1,132 @@
+=== RUN   TestConfigurationFailsBeforeDatabaseAccess
+=== RUN   TestConfigurationFailsBeforeDatabaseAccess/valid
+=== RUN   TestConfigurationFailsBeforeDatabaseAccess/explicit_database
+=== RUN   TestConfigurationFailsBeforeDatabaseAccess/weak_token
+=== RUN   TestConfigurationFailsBeforeDatabaseAccess/distinct_roles
+=== RUN   TestConfigurationFailsBeforeDatabaseAccess/boolean
+=== RUN   TestConfigurationFailsBeforeDatabaseAccess/namespace
+--- PASS: TestConfigurationFailsBeforeDatabaseAccess (0.01s)
+    --- PASS: TestConfigurationFailsBeforeDatabaseAccess/valid (0.00s)
+    --- PASS: TestConfigurationFailsBeforeDatabaseAccess/explicit_database (0.00s)
+    --- PASS: TestConfigurationFailsBeforeDatabaseAccess/weak_token (0.00s)
+    --- PASS: TestConfigurationFailsBeforeDatabaseAccess/distinct_roles (0.00s)
+    --- PASS: TestConfigurationFailsBeforeDatabaseAccess/boolean (0.00s)
+    --- PASS: TestConfigurationFailsBeforeDatabaseAccess/namespace (0.00s)
+PASS
+ok  	github.com/ATLURI0001/resilienceplane/cmd/resilienceplane	1.068s
+?   	github.com/ATLURI0001/resilienceplane/cmd/rpctl	[no test files]
+=== RUN   TestEnvtestAtomicPatch
+=== RUN   TestEnvtestAtomicPatch/NamespaceRBAC
+=== RUN   TestEnvtestAtomicPatch/CRDSchema
+=== RUN   TestEnvtestAtomicPatch/WorkflowWithExplicitStatusInput
+=== RUN   TestEnvtestAtomicPatch/WorkflowWithPostgresAndExplicitStatusInput
+--- PASS: TestEnvtestAtomicPatch (7.76s)
+    --- PASS: TestEnvtestAtomicPatch/NamespaceRBAC (0.03s)
+    --- PASS: TestEnvtestAtomicPatch/CRDSchema (2.08s)
+    --- PASS: TestEnvtestAtomicPatch/WorkflowWithExplicitStatusInput (0.10s)
+    --- PASS: TestEnvtestAtomicPatch/WorkflowWithPostgresAndExplicitStatusInput (0.21s)
+=== RUN   TestReconcileReadsTargetDeploymentAndPassesObservation
+--- PASS: TestReconcileReadsTargetDeploymentAndPassesObservation (0.71s)
+=== RUN   TestRollbackFakeClientAndIdempotentReplay
+--- PASS: TestRollbackFakeClientAndIdempotentReplay (0.01s)
+=== RUN   TestExecutionGuards
+=== RUN   TestExecutionGuards/uid
+=== RUN   TestExecutionGuards/namespace
+=== RUN   TestExecutionGuards/optin
+=== RUN   TestExecutionGuards/gitops
+=== RUN   TestExecutionGuards/flux
+=== RUN   TestExecutionGuards/image_drift
+=== RUN   TestExecutionGuards/unpinned_image
+=== RUN   TestExecutionGuards/generation_drift
+=== RUN   TestExecutionGuards/replica_drift
+=== RUN   TestExecutionGuards/not_executing
+=== RUN   TestExecutionGuards/no_key
+--- PASS: TestExecutionGuards (0.00s)
+    --- PASS: TestExecutionGuards/uid (0.00s)
+    --- PASS: TestExecutionGuards/namespace (0.00s)
+    --- PASS: TestExecutionGuards/optin (0.00s)
+    --- PASS: TestExecutionGuards/gitops (0.00s)
+    --- PASS: TestExecutionGuards/flux (0.00s)
+    --- PASS: TestExecutionGuards/image_drift (0.00s)
+    --- PASS: TestExecutionGuards/unpinned_image (0.00s)
+    --- PASS: TestExecutionGuards/generation_drift (0.00s)
+    --- PASS: TestExecutionGuards/replica_drift (0.00s)
+    --- PASS: TestExecutionGuards/not_executing (0.00s)
+    --- PASS: TestExecutionGuards/no_key (0.00s)
+=== RUN   TestPatchHasAtomicPreconditions
+--- PASS: TestPatchHasAtomicPreconditions (0.00s)
+=== RUN   TestUnknownDeploymentNeverReportsHealthy
+--- PASS: TestUnknownDeploymentNeverReportsHealthy (0.01s)
+=== RUN   TestInvalidTargetRejected
+--- PASS: TestInvalidTargetRejected (0.01s)
+=== RUN   TestPatchErrorPropagates
+--- PASS: TestPatchErrorPropagates (0.00s)
+=== RUN   TestUnavailableLiveReaderNeverRefreshesCachedObservation
+--- PASS: TestUnavailableLiveReaderNeverRefreshesCachedObservation (0.01s)
+=== RUN   TestWorkflowDetectionApprovalRollbackVerificationAndAudit
+--- PASS: TestWorkflowDetectionApprovalRollbackVerificationAndAudit (0.03s)
+PASS
+ok  	github.com/ATLURI0001/resilienceplane/controllers	9.611s
+=== RUN   TestRecoveredTargetDoesNotClaimApprovedIntervention
+--- PASS: TestRecoveredTargetDoesNotClaimApprovedIntervention (0.01s)
+=== RUN   TestLateHealthyEvidenceCannotBypassDeadline
+--- PASS: TestLateHealthyEvidenceCannotBypassDeadline (0.01s)
+=== RUN   TestVerificationBindsApprovedContainerAndReplicaCount
+=== RUN   TestVerificationBindsApprovedContainerAndReplicaCount/container
+=== RUN   TestVerificationBindsApprovedContainerAndReplicaCount/replicas
+--- PASS: TestVerificationBindsApprovedContainerAndReplicaCount (0.02s)
+    --- PASS: TestVerificationBindsApprovedContainerAndReplicaCount/container (0.01s)
+    --- PASS: TestVerificationBindsApprovedContainerAndReplicaCount/replicas (0.01s)
+=== RUN   TestInvalidPolicyViewerDeniedAndAuditedBeforeValidation
+--- PASS: TestInvalidPolicyViewerDeniedAndAuditedBeforeValidation (0.00s)
+=== RUN   TestDetectionWindowBoundsPreventDurationOverflow
+--- PASS: TestDetectionWindowBoundsPreventDurationOverflow (0.00s)
+=== RUN   TestConcurrentClaimsReplayOnePerTargetExecution
+--- PASS: TestConcurrentClaimsReplayOnePerTargetExecution (0.05s)
+=== RUN   TestApprovedRecoveryLifecycle
+--- PASS: TestApprovedRecoveryLifecycle (0.02s)
+=== RUN   TestPolicyFences
+=== RUN   TestPolicyFences/protected
+=== RUN   TestPolicyFences/not-opted-in
+=== RUN   TestPolicyFences/gitops
+=== RUN   TestPolicyFences/blast-radius
+=== RUN   TestPolicyFences/mutable-image
+=== RUN   TestPolicyFences/ordinary-healing
+--- PASS: TestPolicyFences (0.02s)
+    --- PASS: TestPolicyFences/protected (0.00s)
+    --- PASS: TestPolicyFences/not-opted-in (0.00s)
+    --- PASS: TestPolicyFences/gitops (0.00s)
+    --- PASS: TestPolicyFences/blast-radius (0.00s)
+    --- PASS: TestPolicyFences/mutable-image (0.00s)
+    --- PASS: TestPolicyFences/ordinary-healing (0.00s)
+=== RUN   TestFreshnessAndEmergencyStop
+--- PASS: TestFreshnessAndEmergencyStop (0.01s)
+=== RUN   TestTimeoutAndCancellation
+--- PASS: TestTimeoutAndCancellation (0.01s)
+=== RUN   TestNoIncidentAcrossTelemetryGap
+--- PASS: TestNoIncidentAcrossTelemetryGap (0.00s)
+=== RUN   TestPolicyValidation
+--- PASS: TestPolicyValidation (0.00s)
+PASS
+ok  	github.com/ATLURI0001/resilienceplane/internal/core	1.163s
+=== RUN   TestAPIAuthenticationAndAuditedAuthorization
+--- PASS: TestAPIAuthenticationAndAuditedAuthorization (0.00s)
+=== RUN   TestBoundedAPIAndInvalidTokens
+--- PASS: TestBoundedAPIAndInvalidTokens (0.00s)
+PASS
+ok  	github.com/ATLURI0001/resilienceplane/internal/httpapi	1.019s
+=== RUN   TestMemoryTransactionalContract
+--- PASS: TestMemoryTransactionalContract (0.00s)
+=== RUN   TestMemoryConcurrentUpdates
+--- PASS: TestMemoryConcurrentUpdates (0.05s)
+=== RUN   TestMemoryAuditAppendOnly
+--- PASS: TestMemoryAuditAppendOnly (0.00s)
+=== RUN   TestPostgresIntegration
+--- PASS: TestPostgresIntegration (0.07s)
+PASS
+ok  	github.com/ATLURI0001/resilienceplane/internal/store	1.144s
+=== RUN   TestPostgresWorkflow
+    workflow_postgres_test.go:146: actual PostgreSQL workflow resolved incident; stable execution key across reconstructed service; denied viewer approval audited
+--- PASS: TestPostgresWorkflow (0.33s)
+PASS
+ok  	github.com/ATLURI0001/resilienceplane/tests	1.345s

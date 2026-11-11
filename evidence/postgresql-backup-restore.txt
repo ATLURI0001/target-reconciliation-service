@@ -1,0 +1,13 @@
+Date: 2026-11-11 UTC
+pg_dump (PostgreSQL) 17.11 (Debian 17.11-0+deb13u1)
+Source: disposable PostgreSQL dataset produced by actual store/service integration tests.
+Procedure: pg_dump --format=custom; createdb rp_restored; pg_restore --exit-on-error into separate database.
+Verified: aggregate JSON digest + revision + audit count; digest of every ordered audit row.
+Source comparison: 6cb726456b158bbcd26dd93e1fb3c4f0|29|10 / 5fa969fa835c6a60af7cd48af8472610
+Restored comparison: 6cb726456b158bbcd26dd93e1fb3c4f0|29|10 / 5fa969fa835c6a60af7cd48af8472610
+Measured dump duration: 0.058021s
+Measured create-database + restore duration: 0.070639s
+PASS: source and restored state/audit match exactly by compared digests, revision and count.
+Scope: tiny quiescent synthetic laboratory dataset, loopback TCP, no TLS and disposable trust auth.
+No production RPO/RTO, continuous-write consistency, WAL/PITR, encrypted backup storage or cross-region recovery guarantee is established.
+Database archive remains outside repository under scratch .tools; no state backup is included in repository artifacts.

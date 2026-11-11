@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: github.com/ATLURI0001/resilienceplane/tests
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkMemoryInventory1000-2   	     745	   2965241 ns/op	 1029861 B/op	    4086 allocs/op
+BenchmarkMemoryInventory1000-2   	     776	   3133418 ns/op	 1030492 B/op	    4086 allocs/op
+BenchmarkMemoryInventory1000-2   	     685	   3094605 ns/op	 1035617 B/op	    4086 allocs/op
+PASS
+ok  	github.com/ATLURI0001/resilienceplane/tests	7.795s

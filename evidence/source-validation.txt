@@ -1,0 +1,2 @@
+PASS: 26 JSON/YAML files parsed; Helm templates separately validated by helm lint and rendered-output parsing.
+PASS: bash -n scripts/doctor.sh scripts/init-local.sh scripts/demo.sh.

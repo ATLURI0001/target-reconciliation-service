@@ -1,0 +1,11 @@
+ResiliencePlane
+Copyright 2026 Ram Prasad Atluri
+
+This repository's original source is offered under Apache License 2.0.
+Third-party Go modules and container images retain their own licenses and notices.
+A dependency and image license inventory must be reviewed before a public release.
+No upstream project endorsement is implied.
+
+Optional observability uses external Prometheus (Apache-2.0) and Grafana OSS
+(AGPLv3) container images, under their respective upstream licenses. These
+images are not embedded in this source distribution.
