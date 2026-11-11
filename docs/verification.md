@@ -10,7 +10,7 @@ Safety invariants tested include denied authorization with no mutation, stale ev
 
 ## B. Repository artifact
 
-The source archive contains the monorepo, pinned Go/npm dependencies, tests, docs, machine-readable implementation-status.json and raw evidence. Generated .env files, kubeconfigs, databases/dumps, private keys, dependency directories, build caches and binaries are excluded. The executable is rebuilt with `make build`. Local Git is initialized; no remote/publication exists.
+The source archive contains the monorepo, pinned Go/npm dependencies, tests, docs, machine-readable implementation-status.json and raw evidence. Generated .env files, kubeconfigs, databases/dumps, private keys, dependency directories, build caches and compiled applications are excluded. A repository.bundle included inside the ZIP preserves local Git history; clone it into a separate checkout if desired. The executable is rebuilt with `make build`. Local Git is initialized; no remote/publication exists.
 
 ## C. Architecture summary
 

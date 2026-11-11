@@ -12,3 +12,5 @@ Proposed publication steps, only after explicit authorization:
 4. Run and record the complete delivery scenario, then create a reviewed release candidate tag and GitHub release with artifacts, SBOM, signatures and truthful limitations.
 
 A passing source-level test suite does not establish production readiness or complete dependency license approval. Do not label this release enterprise-ready or claim demonstrated large-scale capacity.
+
+The source ZIP includes `repository.bundle` with local history. To restore that history without contacting GitHub, run `git clone /path/to/extracted/resilienceplane/repository.bundle resilienceplane-checkout`. The extracted source tree is also directly buildable. Creating any remote repository or pushing still requires explicit authorization.
