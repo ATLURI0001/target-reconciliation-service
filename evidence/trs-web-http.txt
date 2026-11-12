@@ -1,0 +1,28 @@
+TargetReconciliationService console 0.2.0-dev
+UTC: 2026-11-12T12:00:52.305123+00:00
+Command: npm start + python3 tests/http-smoke.py
+Exit: 0
+
+[
+  {
+    "path": "/",
+    "method": "GET",
+    "status": 200,
+    "expected": 200,
+    "passed": true
+  },
+  {
+    "path": "/api/snapshot",
+    "method": "GET",
+    "status": 401,
+    "expected": 401,
+    "passed": true
+  },
+  {
+    "path": "/api/snapshot",
+    "method": "POST",
+    "status": 405,
+    "expected": 405,
+    "passed": true
+  }
+]

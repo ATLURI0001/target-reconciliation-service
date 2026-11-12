@@ -1,0 +1,24 @@
+Date: 2026-11-12 UTC
+Repository: target-reconciliation-service (renamed module, trs-demo namespace)
+Runtime: Go1.27.4, PostgreSQL17.11, Debian13 amd64
+Actual PostgreSQL server: disposable user-local instance, loopback TCP port55439, 32MB shared_buffers, max_connections40; Unix sockets disabled. Trust authentication only for this disposable test.
+Server package SHA256 d2ce1ddffafa783f9acda4c92c86fc21e8288bff3782d739294f14fa797d7886 matched SHA256 field in official Debian trixie/main amd64 Packages metadata downloaded over HTTPS. Metadata signature verification was not performed.
+Command: TEST_DATABASE_URL=postgres://agent@127.0.0.1:55439/postgres?sslmode=disable go test -race -count=1 -v ./internal/store ./tests
+
+=== RUN   TestMemoryTransactionalContract
+--- PASS: TestMemoryTransactionalContract (0.00s)
+=== RUN   TestMemoryConcurrentUpdates
+--- PASS: TestMemoryConcurrentUpdates (0.05s)
+=== RUN   TestMemoryAuditAppendOnly
+--- PASS: TestMemoryAuditAppendOnly (0.00s)
+=== RUN   TestPostgresIntegration
+--- PASS: TestPostgresIntegration (0.08s)
+PASS
+ok  	github.com/ATLURI0001/target-reconciliation-service/internal/store	1.161s
+=== RUN   TestPostgresWorkflow
+    workflow_postgres_test.go:146: actual PostgreSQL workflow resolved incident; stable execution key across reconstructed service; denied viewer approval audited
+--- PASS: TestPostgresWorkflow (0.09s)
+PASS
+ok  	github.com/ATLURI0001/target-reconciliation-service/tests	1.103s
+
+Scope: actual PostgreSQL persistence, row-lock serialization, audit append-only enforcement and Service workflow replay/verification. Workflow observations are explicitly synthetic inputs. No Docker, Kind, running Pod or real rollout validation is established by these tests. Server stopped cleanly after execution. All server binaries/data remained outside the repository under private scratch .tools.

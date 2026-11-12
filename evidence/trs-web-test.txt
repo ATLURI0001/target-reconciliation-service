@@ -1,0 +1,25 @@
+TargetReconciliationService console 0.2.0-dev
+UTC: 2026-11-12T12:00:08.549519+00:00
+Command: npm test
+Exit: 0
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> target-reconciliation-service-console@0.2.0-dev test
+> node --experimental-strip-types --test tests/*.test.mjs
+
+✔ freshness rejects invalid and implausibly future timestamps (0.836072ms)
+✔ stale connectivity never appears healthy (0.146992ms)
+✔ workload requires fresh, available, updated and observed generation evidence (0.286862ms)
+✔ terminal and dry-run incidents are excluded from active count (0.149676ms)
+✔ transport rejects malformed policy and accepts empty authoritative state (0.786287ms)
+✔ surge replica cannot combine old availability with an unready new revision (0.113461ms)
+✔ snapshot without total replica evidence is rejected (0.354916ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 136.781739

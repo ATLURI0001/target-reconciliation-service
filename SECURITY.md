@@ -1,6 +1,6 @@
 # Security policy
 
-ResiliencePlane is an experimental local-lab control plane. No release currently carries a production support commitment. Development bearer tokens are not OIDC, do not provide per-user identity, and must not be exposed on a public network.
+TargetReconciliationService is an experimental local-lab control plane. No release currently carries a production support commitment. Development bearer tokens are not OIDC, do not provide per-user identity, and must not be exposed on a public network.
 
 Report suspected vulnerabilities privately to root@ramprasadatluri.dev with affected version, reproduction, impact, and redacted evidence. Do not include usable credentials or private infrastructure data. Response and fix timelines are not guaranteed.
 

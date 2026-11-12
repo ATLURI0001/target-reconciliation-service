@@ -2,8 +2,8 @@ package httpapi
 
 import (
 	"context"
-	"github.com/ATLURI0001/resilienceplane/internal/core"
-	"github.com/ATLURI0001/resilienceplane/internal/store"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/store"
 	"net/http/httptest"
 	"strings"
 	"testing"

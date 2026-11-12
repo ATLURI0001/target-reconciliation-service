@@ -1,24 +1,29 @@
-# Console verification — 2026-11-11
+# TRS console verification — 2026-11-12
 
+Project: TargetReconciliationService (TRS), console package
+`target-reconciliation-service-console`, version `0.2.0-dev`.
 Environment: Linux x86-64, Node v24.22.1, npm 11.9.0.
 
-| Command / check | Result | Evidence |
+| Command / check | Result | Evidence from this execution |
 | --- | --- | --- |
-| `npm ci --ignore-scripts --no-audit --no-fund` | Passed | 55 packages installed from `package-lock.json` |
-| `npm test` | Passed, 5 tests | `test-output.txt` |
-| `npm run typecheck` | Passed | `typecheck-output.txt` |
-| Production build (`NEXT_TELEMETRY_DISABLED=1 web/node_modules/.bin/next build web`, from repository root) | Passed after final audit-limit wording change | `build-output.txt` |
-| `npm audit --omit=dev --json` | No reported production dependency vulnerabilities | `audit-production.json`; registry result at execution time, not a security guarantee |
-| Production server `GET /` | HTTP 200 and expected empty-state HTML | `http-smoke.json` |
-| Unauthenticated `GET /api/snapshot` | HTTP 401 | `http-smoke.json` |
-| `POST /api/snapshot` | HTTP 405 | `http-smoke.json` |
-| Browser visual / responsive inspection | Blocked | Chromium could not launch: process-singleton socket creation returned `Operation not permitted` |
-| Live Go + PostgreSQL + Kubernetes UI sequence | Not executed by console subtask | Root verification report determines backend integration status |
+| `npm ci --no-audit --no-fund` | Passed, 55 packages | `../evidence/trs-web-install.txt` |
+| Package metadata against lockfile | Name and version match in both lockfile metadata records | Checked with JSON parser |
+| `npm test` | Passed, 7 tests | `../evidence/trs-web-test.txt` |
+| `npm run typecheck` | Passed | `../evidence/trs-web-typecheck.txt` |
+| `NEXT_TELEMETRY_DISABLED=1 npm run build` | Passed | `../evidence/trs-web-build.txt` |
+| `npm audit --omit=dev --json` | Zero reported production vulnerabilities at execution time | `../evidence/trs-web-audit.json` |
+| Production server `/`, unauthenticated API, POST API | HTTP 200, 401, 405 respectively; new project title in HTML | `../evidence/trs-web-http.txt` |
+| Active source/config search for prior brand and environment prefix | No matches | Source inspected excluding generated dependency/build artifacts |
+| Browser visual / responsive inspection | Not run in this execution | No screenshot or accessibility conformance claim |
+| Go + PostgreSQL + Kubernetes UI sequence | Not run by console subtask | Consult root integration evidence |
 
-The test runner uses controlled fixture values to test freshness and health
-calculations. Fixtures are not displayed as live operational telemetry. No
-screenshots or generated demonstration metrics are included.
+Tests include a rolling-update surge regression: old-revision availability plus
+new-revision updated replicas cannot be combined into a false healthy result.
+Healthy workloads must have total replicas equal to desired replicas, updated
+replicas equal to desired replicas, sufficient availability, and an observed
+current generation. Snapshots lacking total replica evidence are rejected.
 
-A repeat through `npm run build` encountered `ENOSPC` while npm wrote to the
-full `/home/agent` tmpfs. Invoking the identical installed Next build CLI directly
-completed successfully; no dependency source files were removed.
+The prior 2026-11-11 console report and logs are preserved unchanged under
+`../evidence/history/web/`; they describe the earlier project name and are not
+proof of this renamed release. Test fixtures are synthetic inputs to unit tests,
+not live console telemetry. The UI continues to display actual API snapshots only.

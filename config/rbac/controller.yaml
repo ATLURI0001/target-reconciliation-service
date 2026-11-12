@@ -1,18 +1,21 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: resilienceplane-controller
-  namespace: rp-demo
+  name: target-reconciliation-service-controller
+  namespace: trs-demo
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: resilienceplane-controller
-  namespace: rp-demo
+  name: target-reconciliation-service-controller
+  namespace: trs-demo
 rules:
-  - apiGroups: [reliability.resilienceplane.io]
+  - apiGroups: [reliability.trs.io]
     resources: [reliabilitytargets]
     verbs: [get, list, watch]
+  - apiGroups: [reliability.trs.io]
+    resources: [reliabilitytargets/status]
+    verbs: [get, patch, update]
   - apiGroups: [apps]
     resources: [deployments]
     verbs: [get, list, watch, patch]
@@ -23,13 +26,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: resilienceplane-controller
-  namespace: rp-demo
+  name: target-reconciliation-service-controller
+  namespace: trs-demo
 subjects:
   - kind: ServiceAccount
-    name: resilienceplane-controller
-    namespace: rp-demo
+    name: target-reconciliation-service-controller
+    namespace: trs-demo
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: resilienceplane-controller
+  name: target-reconciliation-service-controller

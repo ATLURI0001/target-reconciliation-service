@@ -1,17 +1,17 @@
-name: resilienceplane
+name: target-reconciliation-service
 services:
   postgres:
     image: postgres:17.11-bookworm
     environment:
-      POSTGRES_DB: resilienceplane
-      POSTGRES_USER: resilienceplane
-      POSTGRES_PASSWORD: ${RP_DATABASE_PASSWORD:?Run scripts/init-local.sh}
+      POSTGRES_DB: target-reconciliation-service
+      POSTGRES_USER: target-reconciliation-service
+      POSTGRES_PASSWORD: ${TRS_DATABASE_PASSWORD:?Run scripts/init-local.sh}
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${TRS_DATABASE_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U resilienceplane -d resilienceplane"]
+      test: ["CMD-SHELL", "pg_isready -U target-reconciliation-service -d target-reconciliation-service"]
       interval: 3s
       timeout: 2s
       retries: 20
@@ -20,13 +20,13 @@ services:
     security_opt: ["no-new-privileges:true"]
   api:
     build: .
-    image: resilienceplane:local
+    image: target-reconciliation-service:local
     environment:
-      DATABASE_URL: postgres://resilienceplane:${RP_DATABASE_PASSWORD:?Run scripts/init-local.sh}@postgres:5432/resilienceplane?sslmode=disable
-      RP_LISTEN: 0.0.0.0:8080
-      RP_OPERATOR_TOKEN: ${RP_OPERATOR_TOKEN:?Run scripts/init-local.sh}
-      RP_VIEWER_TOKEN: ${RP_VIEWER_TOKEN:?Run scripts/init-local.sh}
-      RP_KUBERNETES: "false"
+      DATABASE_URL: postgres://target-reconciliation-service:${TRS_DATABASE_PASSWORD:?Run scripts/init-local.sh}@postgres:5432/target-reconciliation-service?sslmode=disable
+      TRS_LISTEN: 0.0.0.0:8080
+      TRS_OPERATOR_TOKEN: ${TRS_OPERATOR_TOKEN:?Run scripts/init-local.sh}
+      TRS_VIEWER_TOKEN: ${TRS_VIEWER_TOKEN:?Run scripts/init-local.sh}
+      TRS_KUBERNETES: "false"
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:
@@ -62,7 +62,7 @@ services:
     profiles: [metrics]
     environment:
       GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: ${RP_GRAFANA_PASSWORD:?Run scripts/init-local.sh to generate the Grafana password}
+      GF_SECURITY_ADMIN_PASSWORD: ${TRS_GRAFANA_PASSWORD:?Run scripts/init-local.sh to generate the Grafana password}
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_AUTH_ANONYMOUS_ENABLED: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"

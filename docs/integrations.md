@@ -5,10 +5,10 @@ The executable initial slice deliberately prioritizes the policy-governed recove
 | Technology | Role | Initial delivery status |
 |---|---|---|
 | Git | Local source history and reviewable change traceability | Repository initialized; no remote push |
-| GitHub | Public source, PRs, issue review, protected releases | Templates prepared; repository creation and publication await approval |
+| GitHub | Public source, PRs, issue review, protected releases | Push/PR Actions workflow and templates prepared; actionlint and local core commands passed; hosted execution/publication pending |
 | Jenkins | Formatting, vet, race tests, Helm validation, secret/dependency scans, image build, SBOM | Pipeline supplied; requires configured agent and actual execution |
-| Docker | Reproducible Go build and local API/PostgreSQL isolation | Dockerfile and Compose supplied; build/run validation requires daemon |
-| Kubernetes | Namespace-scoped observation and opt-in remediation | Controller source and manifests; see verification report for executed checks |
+| Docker | Reproducible Go build and local API/PostgreSQL isolation | Dockerfile, Compose and repeatable Kind lab supplied; genuine local Docker attempt blocked; CI includes live Docker/Kind job |
+| Kubernetes | Namespace-scoped observation and opt-in remediation | Real API/PG integration, native Ready/Reconciled status conditions and scoped status RBAC verified; live Pods blocked |
 | Helm | Versioned control-plane installation | Chart supplied; requires existing database and credential Secret |
 | Terraform | Provider infrastructure provisioning | Planned; no cloud modules represented as complete |
 | Ansible | Repeatable lab and Jenkins host preparation | Planned; no host changes performed |
@@ -22,7 +22,7 @@ The executable initial slice deliberately prioritizes the policy-governed recove
 
 The remaining delivery scenario is GitHub → Jenkins → scanned immutable image → reviewed GitOps commit → Argo CD → canary verification. The supplied Jenkins pipeline stops before artifact publication or GitOps mutation. Do not describe scenario A as demonstrated until that complete chain is run and evidence recorded.
 
-Image tags in the development Dockerfile and Compose are version-specific but not immutable digests. A release must pin image digests, generate an SBOM, scan the resolved images, and sign or verify the published digest. Jenkins requires `go`, Docker, Helm 3, Trivy, and Syft on an isolated `resilienceplane-build` agent. Its Docker access is highly privileged and must not be shared with untrusted workloads.
+Image tags in the development Dockerfile and Compose are version-specific but not immutable digests. A release must pin image digests, generate an SBOM, scan the resolved images, and sign or verify the published digest. Jenkins requires `go`, Docker, Helm 3, Trivy, and Syft on an isolated `target-reconciliation-service-build` agent. Its Docker access is highly privileged and must not be shared with untrusted workloads.
 
 
 ## Selected observability versions

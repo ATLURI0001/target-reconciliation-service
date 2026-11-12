@@ -1,78 +1,95 @@
-# ResiliencePlane verification and handoff
+# TargetReconciliationService (TRS) — verification and handoff
 
-2026-11-11 · 0.1.0-dev · First control-plane milestone, not full flagship release.
+2026-11-12 · 0.2.0-dev. This is an updated, tested development milestone; the full multi-cloud flagship roadmap remains incomplete.
 
 ## A. Implemented functionality
 
-Actual Go API and rpctl; PostgreSQL cluster/observation/policy/incident/audit persistence; controller-runtime ReliabilityTarget reconciler; uncached health reads; deterministic fresh-failure detection; safety policy, dry-run, explicit approval, admission, idempotent digest rollback and attributed readiness verification; identity-linked durable audit; read-only Next.js console. Source includes resource-limited Docker/Compose, Helm, Jenkins validation, optional Prometheus/Grafana configuration, community files and reproducible tests.
+| Requested change | Actual result |
+|---|---|
+| Rename the existing project | Implemented across source/module, API executable, `trsctl`, chart, image, group/annotations, configuration/metrics, console, tests and docs. Historical evidence and durable SQL identifiers are intentionally preserved. |
+| GitHub Actions push/PR CI | Workflow implemented with pinned read-only actions, build/test/lint/race/Helm, real PostgreSQL/envtest/image validation and a separate Docker/Kind live recovery job. actionlint and core commands passed locally; hosted execution has not occurred. |
+| CRD status conditions | Implemented and verified against actual Kubernetes API: status subresource, Ready/Reconciled, observedGeneration, stable transitions, optimistic retries, no-op writes, event predicate and scoped status RBAC. |
+| Actually execute Docker/Kind and record successful demo.sh | **Blocked**. Genuine rootless launch failed during UID/GID mapping; cgroup2 mounting denied. Actual lab entry point failed before creating infrastructure. No successful demo run is included. |
 
-Safety invariants tested include denied authorization with no mutation, stale evidence, opt-in and GitOps exclusion, protected namespace, target UID/spec/image/replica changes, concurrent same-target claims, late verification, recovered-after-approval, API read failure, audit immutability and replay after new service/database connection.
+The prior API/CLI, PostgreSQL workflow, policy/approval/execution/verification and audit remain operational in their tested scope. A readiness defect was corrected: an old available Pod plus an unready new Pod cannot be reported as a completed rollout. Total and updated replicas must both equal desired. The sample selector mismatch was also fixed. The console mirrors the stricter rule.
 
 ## B. Repository artifact
 
-The source archive contains the monorepo, pinned Go/npm dependencies, tests, docs, machine-readable implementation-status.json and raw evidence. Generated .env files, kubeconfigs, databases/dumps, private keys, dependency directories, build caches and compiled applications are excluded. A repository.bundle included inside the ZIP preserves local Git history; clone it into a separate checkout if desired. The executable is rebuilt with `make build`. Local Git is initialized; no remote/publication exists.
+`target-reconciliation-service-0.2.0-dev.zip` contains current source, Go/npm locks, charts, CI/lab scripts, tests, reports, implementation-status.json, raw current evidence and unchanged prior evidence. A repository.bundle preserves local Git history. Source dependencies/build caches, application binaries, credentials, kubeconfigs and databases/dumps are excluded. There is no remote repository or published image.
+
+| Element | Current value |
+|---|---|
+| Full name / abbreviation | TargetReconciliationService / TRS |
+| Repository | target-reconciliation-service |
+| Go module | github.com/ATLURI0001/target-reconciliation-service |
+| API executable | target-reconciliation-service |
+| CLI | trsctl |
+| Helm chart | target-reconciliation-service (chart 0.2.0) |
+| CRD group | reliability.trs.io |
+| Annotation / opt-in | trs.io/execution-key / trs.io/allow-remediation |
+| Docker image | target-reconciliation-service |
+| Environment / metrics | TRS_ / trs_ |
+| Demo namespace | trs-demo |
+
+The rename is a breaking development boundary. It is not an automatic migration of active recovery plans. Read rename-migration.md before reusing an old installation or database. No name exclusivity or domain ownership is asserted.
 
 ## C. Architecture summary
 
-The console/CLI use an authenticated management API. API and namespace-scoped Kubernetes reconciler share the reliability service and PostgreSQL repository. SQL transactions serialize policy/approval/admission and audit. Kubernetes mutations occur after commit with UID/resourceVersion/image CAS and a matching execution marker. Kubernetes evidence is eventually consistent; the SQL aggregate is strongly serialized. There is no implemented NATS service, outbound agent, OIDC, multi-cluster failover or cloud path. See ARCHITECTURE.md and ADRs.
+The management API and namespace-scoped Kubernetes reconciler share the reliability service and PostgreSQL transactions. Approval/admission/audit are durable and serialized. Kubernetes changes occur after commit with UID, generation, image and current resourceVersion fences plus a durable execution marker. The console reads the actual API. New CRD status reports reconciliation/health evidence; it does not authorize operations or certify application-level health. Full API outages cannot be written back as a new Kubernetes condition; backend freshness remains relevant.
 
-## D. Executed validation
+## D. Validation actually executed
 
-Environment: Linux amd64 shared virtual runtime, Go 1.27.4, PostgreSQL 17.11, Kubernetes API 1.35.0/etcd 3.6.6, Node 24.22.1. Test binaries/servers were obtained in task scratch and are not bundled. Exact versions, commands and raw evidence are retained.
-
-| Command or procedure | Outcome | Evidence |
+| Check | Result | Evidence |
 |---|---|---|
-| `make build` with Go 1.27.4 | API and CLI built | evidence/go-build.txt |
-| `go test -p 1 -race -count=1 -v ./...` with TEST_DATABASE_URL and KUBEBUILDER_ASSETS | Passed; 30 top-level tests, no integration skips | evidence/final-integration.txt |
-| `go vet -p 2 ./...` | Passed, no diagnostics | evidence/go-vet.txt |
-| `go mod verify` | All downloaded modules verified | evidence/go-mod-verify.txt |
-| Actual HTTP/PG/CLI/Next proxy smoke | Passed; known viewer mutation denied; semantic validation; audit pagination; real metrics | evidence/http-smoke.json |
-| Real Kubernetes API checks | Atomic stale-RV rejection, CRD schema, namespace/Secrets RBAC, workflow and uncached-failure regression passed | evidence/final-integration.txt |
-| PostgreSQL pg_dump/pg_restore into separate DB | State/revision/ordered audit digests match | evidence/postgresql-backup-restore.txt |
-| Console clean install,5 model tests, typecheck and production build | Passed | web/VERIFICATION.md and linked logs |
-| Helm lint/render | Passed,9 rendered objects including CRD | evidence/helm-lint.txt and helm-rendered.yaml |
-| Prometheus config/rule checks and 2 semantic rule tests | Passed | evidence/prometheus-*.txt |
-| Source JSON/YAML parsing and shell syntax | Passed; Helm templates checked separately | evidence/source-validation.txt |
-| govulncheck1.1.4 binary mode, API and CLI | No vulnerabilities reported for final binaries/manifest | evidence/security-final-binary.txt and security-final-cli.txt |
-| npm production dependency audit |0 reported vulnerabilities at run time | web/audit-production.json |
+| `make build test lint helm` | Passed with actual PostgreSQL and envtest assets configured | evidence/trs-ci-local.txt |
+| `go test -p 1 -race -count=1 -v ./...` | Passed, 37 top-level tests plus subtests; no skips | evidence/trs-final-integration.txt |
+| Kubernetes status/subresource/RBAC/atomic patch | Passed against Kubernetes API 1.35.0 and etcd; real PostgreSQL variant also passed | evidence/trs-final-integration.txt |
+| Actual Go HTTP, PG, trsctl and Next server proxy | Passed | evidence/trs-http-smoke.json |
+| Console clean install,7 model tests, typecheck, production build and HTTP routes | Passed | web/VERIFICATION.md and evidence/trs-web-* |
+| `go mod verify` | All modules verified | evidence/trs-go-mod-verify.txt |
+| Workflow actionlint 1.7.12 and source assertions | Passed | evidence/trs-actions-lint.txt; trs-ci-source-validation.json |
+| Helm lint/render, canonical/chart CRD match | Passed; chart metadata updated to 0.2.0 | evidence/trs-helm.txt; trs-helm-final.txt |
+| CI Helm/Kind/kubectl downloads | Installer ran and verified pinned SHA256 values | scripts/install-ci-tools.sh and docs/CI.md |
+| Shell syntax and JSON/YAML parsing | Passed; templates checked through Helm | evidence/trs-source-validation.txt |
+| govulncheck 1.1.4 binary mode | No known vulnerabilities reported for current API binary | evidence/trs-security-binary.txt |
+| npm production dependency audit |0 reported at execution time | evidence/trs-web-audit.json |
+| Local Docker/rootless and make lab-up | Failed/blocked before containers or cluster ran | evidence/trs-docker-attempt.txt; trs-lab-attempt.txt |
+| Hosted GitHub Actions | Not triggered; no source publication authorized | docs/CI.md |
 
-The actual Kubernetes API tests explicitly set Deployment status as test input: envtest has no scheduler, kubelet or running application. They exercise actual API/SQL mutation and persisted workflow decisions, not actual pod recovery. The Next proxy smoke exercises the running server and real backend, not browser interactions.
+Current environment: shared Linux amd64 workspace; Go 1.27.4, PostgreSQL 17.11, Kubernetes API 1.35.0, Node 24.22.1. All local database/API test processes were stopped after checks. Envtest has no scheduler or kubelets and explicitly injects Deployment rollout status. These tests are real API/SQL verification, not live running-Pod recovery. The HTTP proxy smoke is a server/transport check, not browser visual inspection.
 
-Recorded storage baseline (1000 synthetic entries, in-process Memory snapshot only, GOMAXPROCS=2):
+The small actual snapshot sample comprised 30 sequential loopback requests against synthetic integration-test records (58 cluster records and 3 observations), median 0.927ms and nearest-rank p95 1.294ms. This is not throughput capacity or a recovery-time guarantee. Earlier backup/restore and Memory benchmark evidence remains historical under evidence/history/; those procedures were not rebranded or rerun as new results.
 
-| Iterations | ns/op | B/op | allocations/op |
-|---|---|---|---|
-| 745 | 2965241 | 1029861 | 4086 |
-| 776 | 3133418 | 1030492 | 4086 |
-| 685 | 3094605 | 1035617 | 4086 |
+## E. Known limitations and blockers
 
-The actual PostgreSQL-backed loopback snapshot sample had 30 sequential requests, 1 registered cluster, 0 observed targets and 2 audit entries; median 0.354ms, nearest-rank p95 0.645ms. This tiny read sample and Memory copy benchmark establish no production capacity, concurrent-cluster scale or recovery-time guarantee. See docs/performance.md.
+The Docker/Kind requirement remains unfulfilled in this environment. Installing user-local Docker binaries did not provide a working daemon. Rootless startup failed at missing newuidmap, and a cgroup2 mount attempt was denied. The supplied lab scripts and hosted job must still execute on a capable Docker host; a configured workflow is not a green hosted run. No successful demo.log, pod recovery, application RTO or two-cluster claim is made.
 
-## E. Known limitations and blocked checks
-
-Docker daemon/Kind/kubelets unavailable: no fresh image/Compose runtime, running workload recovery, actual logs/traffic recovery or two-cluster failover was demonstrated. Grafana runtime and browser visual inspection were not verified. Jenkins/GitHub/Argo CD delivery is not executed. Full source/callgraph vulnerability scanning was terminated by resource limits; binary-mode scans and npm audit are narrower checks, not security certification. Trivy/image scans/SBOM/signing and comprehensive license/secret review remain release checks; a basic source pattern scan is not a substitute.
-
-OIDC, multi-tenant isolation, outbound mTLS agents, NATS/outbox, OTel, ELK, request SLIs/SLOs, topology/deployment intelligence, cost/billing analysis, Terraform/Ansible/cloud modules, controlled chaos and route failover are incomplete/planned. Every requested deliverable is classified in implementation-status.json. The first database stores a serialized JSONB aggregate and rewrites retained audit; it is not a scale-ready normalized store. Audit retention, timeout sweeper and per-principal fairness are pending. Migration owner can bypass audit triggers. Cancellation cannot retract an in-flight Kubernetes request. Known-good image trust is operator-supplied, not automatically certified.
+The current CI is a validation pipeline, not a complete GitHub/Jenkins/Argo CD delivery system. OIDC/mTLS, tenant isolation, agents, NATS/outbox, GitOps promotion, full SLO/ELK/OTel integrations, cloud Terraform/Ansible, stateful failover, capacity billing and full management pages remain separate planned/partial milestones. Storage still uses a serialized JSONB aggregate. Container scans/SBOM/signing, broad secret/license review, browser visual inspection and a fresh full source-callgraph security scan are not completed by the current binary/npm checks. Production readiness is not claimed.
 
 ## F. GitHub readiness
 
-Apache-2.0 original-source license, NOTICE, README, architecture/ADRs, contribution/support/security/conduct docs and issue/PR templates are present. Third-party dependency/image/optional-component attribution review is unfinished. The provisional name was searched without a conclusive comprehensive registry/trademark check. Local source is reviewable; no remote repository, push, tag, image publication or billable infrastructure was created. Proposed publication gates are in docs/release.md. This is not a claim of a finished public flagship release.
+Apache-2.0 original source, NOTICE, community templates, architecture/ADRs, security/threat model, migration/runbooks and release instructions are present. The new workflow triggers on push and pull request and requires only read permissions; it never publishes an image or provisions cloud infrastructure. Current source is ready for review, with third-party attribution and runtime release gates outstanding. No remote repository, push, tag, hosted workflow run, billable infrastructure or production mutation occurred.
 
-## G. Continuation plan
+## G. Next engineering milestone
 
-Next complete a fresh one-cluster Docker/Kind installation and real failed-rollout demonstration, including denied viewer mutation, explicit approval, actual pod/request recovery, persistent audit and console timeline. Record installation/teardown and observed recovery times. Then implement production identity and outbound agent enrollment, followed by two-cluster stateless fencing/routing. Expand durable events and reviewed GitOps delivery only after the prior slice is reproducible. See docs/development-progress.md and ROADMAP.md.
+Execute the exact isolated lab on a Docker-capable host, retain the real demo/HTTP/Ready-generation/approval/audit artifacts, and fix any observed runtime failures. Then, after separately authorized publication, verify both Actions jobs on the final pushed commit. Only that evidence can close the two remaining runtime/hosted-execution gaps. Continue other platform milestones from implementation-status.json and development-progress.md.
 
 ## H. Reproduction
 
-Install Go 1.27.4+, Git, Python3, Docker/Compose v2 and Node 22.13+/npm. Use Linux/macOS or Windows WSL2. Install Kind/kubectl for the live lab and Helm 3 for chart checks.
+Prerequisites: Go 1.27.4+, Git, Python3, Docker Engine/Desktop with Compose v2, kubectl, Kind and Helm 3; Node 22.13+/npm for the console. Use Linux/macOS or Windows WSL2. The pinned CI tool installer is Linux/amd64 only; other hosts install native tools.
 
 ```sh
-make doctor
-make init
-make build
-make test
-make up
-make smoke
+make build test lint helm
+make lab-up
+make lab-demo
+make lab-down
+```
+
+`lab-demo` explicitly requests a failure and approval inside only the named disposable cluster. It captures actual service HTTP before/after, current-generation CRD conditions, policy denial with unchanged image, approved digest rollback, verification and audit. Teardown deletes that lab's temporary database; existing unrelated resources are refused/preserved. Read local-lab.md for safe boundaries and abort behavior.
+
+For the console:
+
+```sh
 cd web
 npm ci
 npm test
@@ -81,4 +98,4 @@ npm run build
 npm start
 ```
 
-Console http://127.0.0.1:3000 reads API 8080. Enter the private RP_VIEWER_TOKEN from your generated .env; never commit it. Compose's API-only profile has no fabricated cluster health. For actual Kubernetes integration follow docs/local-lab.md, then explicitly run `RP_DEMO_EXECUTE=yes ./scripts/demo.sh` in the named disposable context. For actual API-server tests, `make envtest`; add a dedicated TEST_DATABASE_URL for durable integration. Ordinary `make test` explicitly skips unavailable integrations and must not be mistaken for the no-skip recorded run. `make down` preserves database volumes; `make kind-down` removes only the named lab cluster.
+For real local API/SQL tests without kubelets, use a disposable TEST_DATABASE_URL and KUBEBUILDER_ASSETS, or `make integration envtest`. Ordinary unit runs explicitly skip unavailable external integrations; only the recorded combined run above had no skips. Full CI sources and command reproduction are in CI.md. No remote publication is required to inspect/build this source.

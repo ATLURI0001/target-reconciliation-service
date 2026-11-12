@@ -2,7 +2,7 @@ export type Cluster = {id: string; environment: string; lastSeen: string; connec
 export type Observation = {
   cluster: string; namespace: string; name: string; uid: string; resourceVersion: string;
   image: string; healthyImage: string; container: string; generation: number;
-  observedGeneration: number; desired: number; available: number; updated: number;
+  observedGeneration: number; desired: number; available: number; updated: number; replicas: number;
   optIn: boolean; gitops: boolean; at: string; executionKey?: string;
 };
 export type Policy = {namespaces: string[]; maxReplicas: number; maxConcurrent: number;
@@ -26,7 +26,7 @@ export function clusterStatus(cluster: Cluster, policy: Policy, now: number): st
 export function workloadStatus(observation: Observation, policy: Policy, now: number): string {
   if (!fresh(observation.at, policy.freshnessSeconds, now)) return "Unobservable";
   if (observation.desired === 0) return "Scaled to zero";
-  return observation.available >= observation.desired && observation.updated >= observation.desired &&
+  return observation.replicas === observation.desired && observation.available >= observation.desired && observation.updated === observation.desired &&
     observation.observedGeneration >= observation.generation ? "Healthy" : "Degraded";
 }
 export function activeIncident(incident: Incident): boolean {
@@ -51,7 +51,7 @@ export function parseSnapshot(input: unknown): Snapshot {
   }
   for (const observation of Object.values(value.observations as Record<string, Observation>)) {
     if (!observation || typeof observation.name !== "string" || typeof observation.at !== "string" ||
-      ![observation.desired, observation.available, observation.updated, observation.generation, observation.observedGeneration].every(Number.isFinite)) throw new Error("Invalid workload data");
+      ![observation.desired, observation.available, observation.updated, observation.replicas, observation.generation, observation.observedGeneration].every(Number.isFinite)) throw new Error("Invalid workload data");
   }
   for (const incident of Object.values(value.incidents as Record<string, Incident>)) {
     if (!incident || typeof incident.id !== "string" || typeof incident.state !== "string" || typeof incident.target !== "string" ||

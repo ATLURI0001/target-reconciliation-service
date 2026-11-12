@@ -1,14 +1,14 @@
-# Local execution profiles
+# Local execution
 
-The first slice has two supported startup modes. A two-cluster full lab, outbound agents, multi-cloud provisioning, ELK, Argo CD, and Jenkins installation are later milestones. Their absence is not silently replaced by simulation.
+TargetReconciliationService (TRS) provides an API/PostgreSQL mode and an isolated one-cluster reliability lab. Two-cluster failover, outbound agents, multi-cloud infrastructure, ELK, Argo CD delivery, and a full local Jenkins installation remain separate milestones.
 
 ## Prerequisites
 
-Linux, macOS, or Windows with WSL2; Go 1.27.4 or newer; Git; Python 3; Docker Engine/Desktop with Compose v2. Kubernetes mode additionally needs kubectl, Kind, and access to pull the pinned demonstration image. Helm 3 is needed only for chart validation or chart deployment. `make doctor` reports missing tools and installation references.
+Use Linux, macOS, or Windows with WSL2. Install Go at the version in `go.mod`, Git, Python 3, Docker Engine/Desktop with Compose v2, kubectl, and Kind. Helm 3 is required for chart validation. Run `make doctor` for actionable missing-tool checks. The lab requires a working Docker daemon with local Kubernetes support; Linux hosts require cgroup v2 for the pinned Kubernetes 1.35 node image.
 
-Suggested initial hardware is 4 CPU cores and 8 GiB available memory for a one-cluster lab. This is a setup estimate, not a measured resource requirement. Compose limits PostgreSQL to 512 MiB and the API to 256 MiB. Kind node memory is controlled by the container runtime and is not bounded by the supplied cluster YAML.
+A setup estimate is 4 CPU cores and 8 GiB available memory for the one-cluster lab, not a measured minimum. PostgreSQL has a 512 MiB container memory limit. Kind node resource use is controlled by the container runtime; it is not bounded by the supplied node YAML. The sample application uses synthetic HTTP responses and explicitly permits TRS remediation only in `trs-demo`.
 
-## API and PostgreSQL
+## API and database only
 
 ```sh
 make init
@@ -16,57 +16,54 @@ make up
 make smoke
 ```
 
-The private `.env` contains independently generated development tokens and a database password. Keep it out of Git. API and database ports bind only to loopback. `make down` stops project containers but preserves the database volume. No Kubernetes access is mounted into the Compose API.
+The generated `.env` has independent random database and API credentials. API 8080 and database5432 are bound to loopback. `TRS_DATABASE_PORT` can override the host database port. The Compose API deliberately has no Kubernetes credentials mounted, so no cluster data appears until observations are collected by a Kubernetes-enabled controller. Optional `make metrics-up` adds Prometheus and Grafana; see `observability/README.md`.
 
-Do not expose development tokens publicly. PostgreSQL and API traffic in this local profile is plaintext on a local Docker network. Production identity, database TLS, API TLS, and credential rotation are not implemented by this profile.
+`make down` preserves PostgreSQL data. Development token auth, local plaintext HTTP, and the local database network do not provide production identity or transport security. Do not expose this profile publicly.
 
-## One-cluster reliability lab
-
-Run in a dedicated lab context. These commands create only a named local Kind cluster and project-managed namespaces:
+## Automated real Kubernetes lab
 
 ```sh
-make init
-make kind-up
-kubectl config current-context
-# Expected: kind-resilienceplane-lab
-kubectl apply -f config/crd/
-kubectl apply -f examples/demo/
-docker compose up -d postgres
-make build
-set -a
-. ./.env
-set +a
-export DATABASE_URL="postgres://resilienceplane:${RP_DATABASE_PASSWORD}@127.0.0.1:5432/resilienceplane?sslmode=disable"
-export RP_KUBERNETES=true
-export RP_CLUSTER_ID=local
-export RP_NAMESPACE=rp-demo
-./bin/resilienceplane
+make lab-up
+make lab-demo
+make lab-down
 ```
 
-The host process uses the current kubeconfig and leader election within `rp-demo`. The initial implementation refuses namespaces other than `rp-demo`. The target created by the demo script captures an actually healthy runtime image digest; the control plane does not infer a trustworthy rollback image from a mutable tag. Follow `scripts/demo.sh` and the scenario documentation for policy, approval, rollout fault, and verification operations. Dry-run is the default and must be explicitly disabled for the permitted lab policy before an actual change.
+`lab-up` first checks its prerequisites and refuses an existing `.lab` directory, an existing named Kind cluster, or existing `trs-lab` Compose resources. It requires free loopback ports 8080,55432, and 18080. It then creates:
 
-The host process runs with the kubeconfig user's privileges. For least-privilege deployment, use the chart service account in a dedicated management namespace. The chart limits its application Role to `rp-demo` and leases to `rp-demo`; it does not install a cluster-admin role.
+- Kind cluster `target-reconciliation-service-lab`, using a digest-pinned Kubernetes 1.35.0 node image.
+- A private `.lab/kubeconfig`, without changing the user's default kubeconfig.
+- The real `ReliabilityTarget` CRD, `trs-demo` namespace, sample catalog Deployment and Service.
+- A dedicated Compose PostgreSQL database in project `trs-lab`, with port 55432 and random temporary credentials.
+- The compiled Go API/controller host process, authenticated with those temporary credentials and connected to that dedicated cluster and database.
 
-## Helm deployment boundary
+The host controller runs with its private Kind kubeconfig's lab administrator access. The Helm service-account deployment provides the namespace-scoped RBAC alternative. No unrestricted kubeconfig is distributed to an agent or committed. These scripts do not create cloud resources.
 
-The chart packages the ReliabilityTarget CRD in `crds/` and installs it on first Helm installation. Helm does not automatically upgrade CRDs; apply `config/crd/` explicitly for schema upgrades. The `rp-demo` namespace must exist before installation. It also expects a reachable PostgreSQL database and an existing Secret named `resilienceplane-runtime` in the release namespace with keys `DATABASE_URL`, `RP_OPERATOR_TOKEN`, and `RP_VIEWER_TOKEN`. Create that Secret from a private local file; never commit a Secret manifest or pass credentials in a recorded shell command.
+Invoking `make lab-demo` explicitly requests a test-only failed rollout and approval against this lab. The script checks the exact local context, derives a recovery image digest from the actual running pod, creates a target, and waits for a current-generation `Ready=True` condition. It verifies real service HTTP before introducing an invalid image. The catalog's `maxSurge:0` and `maxUnavailable:1` strategy deliberately permits a real interruption so an old healthy pod cannot mask the failure. This is a destructive test setting confined to the sample application.
+
+The demo waits for `Ready=False`, an actual `AwaitingApproval` incident and a matching unhealthy image. It proves a viewer gets HTTP403 and the actual Deployment image remains unchanged. The operator then approves recovery. Success requires the incident to be `Resolved`, a current-generation target `Ready=True`, successful Kubernetes rollout, exact restoration of the recorded digest, and a real HTTP response from the service. A failed condition returns a nonzero exit code. The original policy is restored on exit. Temporary service port-forward processes are stopped.
+
+## Evidence and cleanup
+
+Successful and failed executions save logs and collected objects under `evidence/lab-local/`, or `TRS_EVIDENCE_DIR` if set. Evidence includes the command log, before/after service responses, target conditions and observed generations, real persisted workflow snapshots, policy denial check, audit timeline, metrics, and final workload state. It excludes `.lab/`, credentials, request headers, and kubeconfig. No expected result is written as a successful measurement before the associated check passes.
+
+`make lab-down` sends SIGTERM only to the recorded controller when its command matches the expected binary, deletes only the lab-created named Kind cluster, stops the dedicated Compose project, and intentionally deletes its disposable database volume. Temporary credentials and kubeconfig are removed. Failed startup also attempts this scoped cleanup. If a cleanup tool fails, inspect its report before retrying; no unrelated project is deleted. Evidence remains for diagnosis.
+
+This execution environment could not start Docker: the actual rootless attempt failed during UID/GID setup because `newuidmap` was unavailable, and cgroup mounting was also denied. See `evidence/trs-docker-attempt.txt`. Therefore, the full Docker/Kind/service-HTTP demo has not been measured here. The GitHub Actions Kind job contains the actual commands for a Docker-capable hosted runner, but a supplied workflow is not proof that hosted execution passed.
+
+## Helm installation boundary
+
+The chart packages the CRD on first installation. Helm does not automatically upgrade CRDs, so run `kubectl apply -f config/crd/` explicitly before upgrading an existing lab. The chart also expects `trs-demo` to exist, a reachable PostgreSQL database, and a private existing Secret in the release namespace named `target-reconciliation-service-runtime` containing `DATABASE_URL`, `TRS_OPERATOR_TOKEN`, and `TRS_VIEWER_TOKEN`.
+
+Do not copy a host URL using `127.0.0.1` into a pod: it would point at that pod, not the host. Database installation, transport security, and credentials are explicit chart prerequisites.
 
 ```sh
 make helm
-# Build/load the control-plane image in the named Kind cluster:
-docker build -t resilienceplane:local .
-kind load docker-image resilienceplane:local --name resilienceplane-lab
-# After separately creating a reachable database and private Secret:
-helm upgrade --install resilienceplane deploy/helm/resilienceplane \
-  --namespace resilienceplane --create-namespace
-kubectl -n resilienceplane rollout status deployment/resilienceplane --timeout=120s
-kubectl -n resilienceplane port-forward service/resilienceplane 8080:8080
+docker build -t target-reconciliation-service:local .
+kind load docker-image target-reconciliation-service:local --name target-reconciliation-service-lab
+# After creating the namespace, reachable database, and private credential Secret:
+helm upgrade --install target-reconciliation-service deploy/helm/target-reconciliation-service \
+  --namespace target-reconciliation-service --create-namespace
+kubectl -n target-reconciliation-service rollout status deployment/target-reconciliation-service --timeout=120s
 ```
 
-A database address of `127.0.0.1` in the Secret points at the API pod itself, not the host. The Compose database address cannot be copied unchanged into a Kubernetes pod. Database installation and TLS are an explicit prerequisite for this chart. The chart does not represent a fully automated full-local profile.
-
-The included ingress NetworkPolicy allows port 8080 only from same-namespace pods labeled `resilienceplane.io/api-client=true`. It requires a CNI implementing NetworkPolicy; default Kind networking does not enforce it. Egress restrictions and API-server address rules remain to be added and validated.
-
-## Teardown
-
-Stop the host API with Ctrl+C, run `make down`, then `make kind-down`. These commands preserve PostgreSQL data by default and delete only the named Kind cluster. To intentionally erase local database state after backing up anything required, run `docker compose down --volumes` from this repository. This deletes the project-managed PostgreSQL volume.
+The chart limits controller RBAC to `trs-demo` deployments, targets/status, and leader-election leases. The management ingress NetworkPolicy permits labeled API clients; enforcement requires a compatible CNI and is not provided by default Kind networking. Egress restrictions and production identity remain incomplete.

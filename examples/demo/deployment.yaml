@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: rp-demo
+  name: trs-demo
   labels:
     pod-security.kubernetes.io/enforce: restricted
 ---
@@ -9,18 +9,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: catalog
-  namespace: rp-demo
+  namespace: trs-demo
   labels:
-    resilienceplane.io/allow-remediation: "true"
+    trs.io/allow-remediation: "true"
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
-      app: rp-catalog
+      app: trs-catalog
   template:
     metadata:
       labels:
-        app: rp-catalog
+        app: trs-catalog
     spec:
       securityContext:
         runAsNonRoot: true
@@ -49,9 +54,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: catalog
-  namespace: rp-demo
+  namespace: trs-demo
 spec:
-  selector: {app: rp-catalog}
+  selector: {app: trs-catalog}
   ports:
     - port: 8080
       targetPort: 8080

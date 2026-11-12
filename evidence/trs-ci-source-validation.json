@@ -1,0 +1,15 @@
+{
+  "hosted_run_executed": false,
+  "workflow_yaml_parsed": true,
+  "actionlint_version": "1.7.12",
+  "actionlint_exit_code": 0,
+  "read_only_contents_permission": true,
+  "pull_request_target": false,
+  "all_actions_commit_pinned": true,
+  "required_make_commands_present": true,
+  "installer_download_checksum_verification": "passed for all 3 binaries locally",
+  "shell_syntax_checks": "passed",
+  "full_kind_demo": "blocked: Docker daemon could not start",
+  "formatter_failure_propagates": true,
+  "vet_failure_propagates": true
+}

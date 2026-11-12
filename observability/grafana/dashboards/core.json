@@ -1,8 +1,8 @@
 {
-  "uid": "resilienceplane-core",
-  "title": "ResiliencePlane \u00b7 Core Reliability",
+  "uid": "target-reconciliation-service-core",
+  "title": "TargetReconciliationService \u00b7 Core Reliability",
   "tags": [
-    "resilienceplane",
+    "target-reconciliation-service",
     "live-backend"
   ],
   "timezone": "browser",
@@ -23,7 +23,7 @@
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
-        "uid": "resilienceplane-prometheus"
+        "uid": "target-reconciliation-service-prometheus"
       },
       "gridPos": {
         "x": 0,
@@ -34,7 +34,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "rate(resilienceplane_http_requests_total[5m])",
+          "expr": "rate(trs_http_requests_total[5m])",
           "legendFormat": "requests / second"
         }
       ],
@@ -61,7 +61,7 @@
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
-        "uid": "resilienceplane-prometheus"
+        "uid": "target-reconciliation-service-prometheus"
       },
       "gridPos": {
         "x": 12,
@@ -72,7 +72,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "resilienceplane:http_failure_ratio5m",
+          "expr": "target-reconciliation-service:http_failure_ratio5m",
           "legendFormat": "API failures / requests"
         }
       ],
@@ -99,7 +99,7 @@
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
-        "uid": "resilienceplane-prometheus"
+        "uid": "target-reconciliation-service-prometheus"
       },
       "gridPos": {
         "x": 0,
@@ -110,7 +110,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "time() - resilienceplane_cluster_last_seen_seconds",
+          "expr": "time() - trs_cluster_last_seen_seconds",
           "legendFormat": "{{cluster}}"
         }
       ],
@@ -137,7 +137,7 @@
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
-        "uid": "resilienceplane-prometheus"
+        "uid": "target-reconciliation-service-prometheus"
       },
       "gridPos": {
         "x": 12,
@@ -148,7 +148,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "resilienceplane_deployment_available_replicas",
+          "expr": "trs_deployment_available_replicas",
           "legendFormat": "{{cluster}} {{namespace}} {{deployment}}"
         }
       ],
@@ -175,7 +175,7 @@
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
-        "uid": "resilienceplane-prometheus"
+        "uid": "target-reconciliation-service-prometheus"
       },
       "gridPos": {
         "x": 0,
@@ -186,7 +186,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "resilienceplane_deployment_desired_replicas",
+          "expr": "trs_deployment_desired_replicas",
           "legendFormat": "{{cluster}} {{namespace}} {{deployment}}"
         }
       ],
@@ -213,7 +213,7 @@
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
-        "uid": "resilienceplane-prometheus"
+        "uid": "target-reconciliation-service-prometheus"
       },
       "gridPos": {
         "x": 12,
@@ -224,7 +224,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "resilienceplane_incidents",
+          "expr": "trs_incidents",
           "legendFormat": "{{state}}"
         }
       ],

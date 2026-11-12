@@ -35,6 +35,7 @@ type Observation struct {
 	Generation         int64     `json:"generation"`
 	ObservedGeneration int64     `json:"observedGeneration"`
 	Desired            int32     `json:"desired"`
+	Replicas           int32     `json:"replicas"`
 	Available          int32     `json:"available"`
 	Updated            int32     `json:"updated"`
 	OptIn              bool      `json:"optIn"`
@@ -45,7 +46,7 @@ type Observation struct {
 
 func (o Observation) Key() string { return o.Cluster + "/" + o.Namespace + "/" + o.Name }
 func (o Observation) Healthy() bool {
-	return o.Desired > 0 && o.Available >= o.Desired && o.Updated >= o.Desired && o.ObservedGeneration >= o.Generation
+	return o.Desired > 0 && o.Replicas == o.Desired && o.Available >= o.Desired && o.Updated == o.Desired && o.ObservedGeneration >= o.Generation
 }
 
 type Plan struct {
@@ -92,14 +93,14 @@ func (p Policy) Validate() error {
 		return fmt.Errorf("%w: invalid safety policy", ErrInvalid)
 	}
 	for _, n := range p.Namespaces {
-		if n == "" || n == "default" || n == "kube-system" || n == "resilienceplane" {
+		if n == "" || n == "default" || n == "kube-system" || n == "target-reconciliation-service" {
 			return fmt.Errorf("%w: protected namespace", ErrInvalid)
 		}
 	}
 	return nil
 }
 func DefaultPolicy() Policy {
-	return Policy{Namespaces: []string{"rp-demo"}, MaxReplicas: 3, MaxConcurrent: 1, FreshnessSeconds: 30, DetectionSeconds: 30, DryRun: true}
+	return Policy{Namespaces: []string{"trs-demo"}, MaxReplicas: 3, MaxConcurrent: 1, FreshnessSeconds: 30, DetectionSeconds: 30, DryRun: true}
 }
 
 type State struct {

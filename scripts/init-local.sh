@@ -18,7 +18,7 @@ with os.fdopen(fd, 'a+') as f:
         if '=' in line and not line.lstrip().startswith('#'):
             key, value = line.split('=', 1)
             keys[key] = value
-    required = ('RP_DATABASE_PASSWORD', 'RP_OPERATOR_TOKEN', 'RP_VIEWER_TOKEN', 'RP_GRAFANA_PASSWORD')
+    required = ('TRS_DATABASE_PASSWORD', 'TRS_OPERATOR_TOKEN', 'TRS_VIEWER_TOKEN', 'TRS_GRAFANA_PASSWORD')
     if any(key in keys and not keys[key] for key in required):
         raise SystemExit('A required .env value is empty; repair it before startup. Existing values were preserved.')
     missing = [key for key in required if key not in keys]

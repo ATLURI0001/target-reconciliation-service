@@ -8,7 +8,7 @@ Use `Authorization: Bearer <private token>` over loopback for the local lab. Ser
 
 `POST /v1/clusters` registers a DNS-label id and environment `test`; health remains unobserved until the trusted controller reads Kubernetes. `PUT /v1/policy` replaces the complete policy. `/v1/incidents/{id}/approve` and `/cancel` accept POST. Duplicate or terminal approvals return409; execution admission is keyed independently. The dry-run approval returns200 with a DryRun state, never an execution. Inspect snapshot or audit for the decision.
 
-Policy defaults: namespace rp-demo, maxReplicas 3, maxConcurrent 1, freshness 30s, continuous fresh-failure detection 30s, dryRun=true, emergencyStop=false. A rollback needs a distinct digest-pinned recovery image, opt-in, exclusive runtime ownership, fresh evidence and explicit approval. Even an operator cannot bypass policy. Policy validation rejects protected namespaces, invalid freshness/concurrency and detection durations outside1..86400 seconds.
+Policy defaults: namespace trs-demo, maxReplicas 3, maxConcurrent 1, freshness 30s, continuous fresh-failure detection 30s, dryRun=true, emergencyStop=false. A rollback needs a distinct digest-pinned recovery image, opt-in, exclusive runtime ownership, fresh evidence and explicit approval. Even an operator cannot bypass policy. Policy validation rejects protected namespaces, invalid freshness/concurrency and detection durations outside1..86400 seconds.
 
 Responses:400 invalid request,401 invalid/missing authentication,403 known principal/policy denied,404 missing entity,409 invalid transition,429 admission-rate limit,503 queue/store unavailable,500 unexpected internal failure with no raw database error. There is a global burst 100/20rps limiter and 32 in-flight request cap. A denied authenticated mutation is committed to audit before403 is returned.
 
@@ -17,13 +17,13 @@ Responses:400 invalid request,401 invalid/missing authentication,403 known princ
 ```sh
 make build
 set -a; . ./.env; set +a
-export RP_TOKEN="$RP_VIEWER_TOKEN"
-./bin/rpctl snapshot
-./bin/rpctl audit
+export TRS_TOKEN="$TRS_VIEWER_TOKEN"
+./bin/trsctl snapshot
+./bin/trsctl audit
 # For an explicitly selected incident, with operator authority:
-export RP_TOKEN="$RP_OPERATOR_TOKEN"
-./bin/rpctl approve INCIDENT_ID
-./bin/rpctl cancel INCIDENT_ID
+export TRS_TOKEN="$TRS_OPERATOR_TOKEN"
+./bin/trsctl approve INCIDENT_ID
+./bin/trsctl cancel INCIDENT_ID
 ```
 
-`RP_API_URL` defaults to http://127.0.0.1:8080. The CLI refuses plaintext HTTP outside localhost and refuses redirects. It never prints its bearer token. `rpctl register local` and `rpctl policy path/to/policy.json` are operator commands. CLI `audit` currently returns the first 100 entries; use HTTP pagination for later entries. The read-only console uses its own server-configured backend URL and never persists the browser token.
+`TRS_API_URL` defaults to http://127.0.0.1:8080. The CLI refuses plaintext HTTP outside localhost and refuses redirects. It never prints its bearer token. `trsctl register local` and `trsctl policy path/to/policy.json` are operator commands. CLI `audit` currently returns the first 100 entries; use HTTP pagination for later entries. The read-only console uses its own server-configured backend URL and never persists the browser token.

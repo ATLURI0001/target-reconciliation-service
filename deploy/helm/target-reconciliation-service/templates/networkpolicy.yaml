@@ -11,7 +11,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              resilienceplane.io/api-client: "true"
+              trs.io/api-client: "true"
       ports:
         - protocol: TCP
           port: 8080

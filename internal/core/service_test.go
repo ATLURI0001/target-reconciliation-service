@@ -3,8 +3,8 @@ package core_test
 import (
 	"context"
 	"errors"
-	"github.com/ATLURI0001/resilienceplane/internal/core"
-	"github.com/ATLURI0001/resilienceplane/internal/store"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/store"
 	"strings"
 	"testing"
 	"time"
@@ -26,7 +26,7 @@ func fixture(t *testing.T) (*core.Service, *time.Time, core.Observation) {
 	if e := s.SetPolicy(ctx, operator, p); e != nil {
 		t.Fatal(e)
 	}
-	o := core.Observation{Cluster: "local", Namespace: "rp-demo", Name: "catalog", UID: "uid", ResourceVersion: "1", Image: "bad:v2", HealthyImage: "example/catalog@sha256:" + strings.Repeat("a", 64), Container: "catalog", Generation: 2, ObservedGeneration: 2, Desired: 2, OptIn: true}
+	o := core.Observation{Cluster: "local", Namespace: "trs-demo", Name: "catalog", UID: "uid", ResourceVersion: "1", Image: "bad:v2", HealthyImage: "example/catalog@sha256:" + strings.Repeat("a", 64), Container: "catalog", Generation: 2, ObservedGeneration: 2, Desired: 2, Replicas: 2, OptIn: true}
 	return s, &now, o
 }
 func detect(t *testing.T, s *core.Service, now *time.Time, o core.Observation) core.Incident {

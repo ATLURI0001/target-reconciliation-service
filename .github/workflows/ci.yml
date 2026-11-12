@@ -1,0 +1,94 @@
+name: Build, test, and lab verification
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trs-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  verify:
+    name: Go, PostgreSQL, envtest, Helm, and image build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # verified v4 ref, 2026-11-12
+        with:
+          persist-credentials: false
+      - name: Set up Go from go.mod
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # verified v5 ref, 2026-11-12
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: true
+      - name: Install checksum-pinned lab tools
+        run: ./scripts/install-ci-tools.sh
+      - name: Verify source and chart
+        run: |
+          make build
+          make test
+          make lint
+          make race
+          make helm
+      - name: Verify PostgreSQL and Kubernetes API interactions
+        run: |
+          make init
+          docker compose up -d --wait postgres
+          set -a
+          . ./.env
+          set +a
+          export TEST_DATABASE_URL="postgres://target-reconciliation-service:${TRS_DATABASE_PASSWORD}@127.0.0.1:5432/target-reconciliation-service?sslmode=disable"
+          make integration
+          make envtest
+      - name: Build the runtime image without publication
+        run: docker build --tag target-reconciliation-service:ci .
+      - name: Stop only project-managed test database
+        if: always()
+        run: |
+          if [[ -f .env ]]; then docker compose down --volumes; fi
+          rm -f .env
+
+  kind-lab:
+    name: Real failed rollout, denial, approval, and verified recovery
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      TRS_EVIDENCE_DIR: evidence/ci-lab
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Go from go.mod
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: true
+      - name: Install checksum-pinned lab tools
+        run: ./scripts/install-ci-tools.sh
+      - name: Start isolated one-cluster lab
+        run: make lab-up
+      - name: Run permitted failed-rollout recovery
+        run: make lab-demo
+      - name: Stop lab and erase its temporary credentials
+        if: always()
+        run: make lab-down
+      - name: Upload sanitized operational evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # verified v4 ref, 2026-11-12
+        with:
+          name: trs-kind-lab-${{ github.run_id }}-${{ github.run_attempt }}
+          path: evidence/ci-lab/
+          if-no-files-found: warn
+          retention-days: 7

@@ -9,9 +9,16 @@ Research date:2026-11-11. Official upstream documentation was consulted; pinned 
 - NATS consumer acknowledgement/retry semantics: https://docs.nats.io/nats-concepts/jetstream/consumers . Deferred outbox/consumer design must use bounded retries and explicit acknowledgements; exhausted deliveries do not automatically constitute a dead-letter queue.
 - Next/React/Tailwind exact package selections and installed lockfile are recorded in web/package.json and web/package-lock.json; build/audit results are in web/VERIFICATION.md.
 
-## Brand check
+## Naming and current implementation references
 
-Exact-name web searches for `ResiliencePlane` and `ResiliencePlane github` found no clear matching project in this session. GitHub's unauthenticated repository-search page could not be fetched, so a complete repository, package, trademark and domain check was not possible. The name remains provisional. No global uniqueness or legal availability claim is made. Recheck GitHub repositories, registries and relevant marks before public release.
+The user selected TargetReconciliationService (TRS), repository `target-reconciliation-service`, on 2026-11-12. Earlier exact-name searches concerned ResiliencePlane; they do not establish availability of the new name. No uniqueness, trademark or domain-ownership assertion is made. See rename-migration.md for API group and operational compatibility boundaries.
+
+Official references consulted for this revision:
+
+- CRD status subresources and generation semantics: https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/ .
+- Condition observedGeneration and status schema: https://kubernetes.io/docs/reference/kubernetes-api/apiextensions/custom-resource-definition-v1/ .
+- GitHub Go workflows: https://docs.github.com/en/actions/tutorials/build-and-test-code/go and https://github.com/actions/setup-go .
+- Kind rootless prerequisites, including cgroup v2 delegation: https://kind.sigs.k8s.io/docs/user/rootless/ . Actual local Docker launch limitations are recorded separately; configuration is not execution evidence.
 
 ## Security-driven dependency revisions
 

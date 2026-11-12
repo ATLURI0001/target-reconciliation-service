@@ -11,22 +11,24 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ATLURI0001/resilienceplane/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
 	appsv1 "k8s.io/api/apps/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 )
 
 const (
-	DemoNamespace       = "rp-demo"
-	ExecutionAnnotation = "resilienceplane.io/execution-key"
-	OptInLabel          = "resilienceplane.io/allow-remediation"
+	DemoNamespace       = "trs-demo"
+	ExecutionAnnotation = "trs.io/execution-key"
+	OptInLabel          = "trs.io/allow-remediation"
 )
 
-var TargetGVK = schema.GroupVersionKind{Group: "reliability.resilienceplane.io", Version: "v1alpha1", Kind: "ReliabilityTarget"}
+var TargetGVK = schema.GroupVersionKind{Group: "reliability.trs.io", Version: "v1alpha1", Kind: "ReliabilityTarget"}
 var ErrUnsafePlan = errors.New("unsafe execution plan")
 var digestImage = regexp.MustCompile(`^\S+@sha256:[a-f0-9]{64}$`)
 
@@ -50,7 +52,7 @@ type TargetReconciler struct {
 func Setup(mgr ctrl.Manager, workflow Workflow, _ core.Store, clusterID string) error {
 	target := &unstructured.Unstructured{}
 	target.SetGroupVersionKind(TargetGVK)
-	return ctrl.NewControllerManagedBy(mgr).Named("reliability-target").For(target).Complete(&TargetReconciler{Client: mgr.GetClient(), Reader: mgr.GetAPIReader(), Workflow: workflow, ClusterID: clusterID, Now: time.Now})
+	return ctrl.NewControllerManagedBy(mgr).Named("reliability-target").For(target).WithEventFilter(predicate.GenerationChangedPredicate{}).Complete(&TargetReconciler{Client: mgr.GetClient(), Reader: mgr.GetAPIReader(), Workflow: workflow, ClusterID: clusterID, Now: time.Now})
 }
 
 func (r *TargetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -61,51 +63,67 @@ func (r *TargetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	defer cancel()
 	target := &unstructured.Unstructured{}
 	target.SetGroupVersionKind(TargetGVK)
-	reader := r.Reader
-	if reader == nil {
-		reader = r.Client
-	}
-	if err := reader.Get(ctx, req.NamespacedName, target); err != nil {
+	if err := r.reader().Get(ctx, req.NamespacedName, target); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	name, _, _ := unstructured.NestedString(target.Object, "spec", "deployment")
 	container, _, _ := unstructured.NestedString(target.Object, "spec", "container")
 	image, _, _ := unstructured.NestedString(target.Object, "spec", "healthyImage")
 	if name == "" || container == "" || !digestImage.MatchString(image) {
-		return ctrl.Result{}, fmt.Errorf("invalid ReliabilityTarget: deployment, container and digest-pinned healthyImage required")
+		err := fmt.Errorf("invalid ReliabilityTarget: deployment, container and digest-pinned healthyImage required")
+		return r.finish(ctx, target, unknownStatus("SpecInvalid", err.Error()), err)
 	}
 	var deployment appsv1.Deployment
-	if err := reader.Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: name}, &deployment); err != nil {
-		return ctrl.Result{}, err
+	if err := r.reader().Get(ctx, types.NamespacedName{Namespace: req.Namespace, Name: name}, &deployment); err != nil {
+		status := unknownStatus("ObservationUnavailable", "Live Deployment observation failed; prior evidence is retained")
+		if apierrors.IsNotFound(err) {
+			status.Ready = "False"
+			status.Reason = "DeploymentNotFound"
+			status.Message = "Referenced Deployment does not exist"
+		}
+		return r.finish(ctx, target, status, err)
 	}
 	observation, err := r.observe(&deployment, container, image)
 	if err != nil {
-		return ctrl.Result{}, err
+		return r.finish(ctx, target, unknownStatus("SpecInvalid", err.Error()), err)
 	}
+	status := observedStatus(observation)
 	if err = r.Workflow.Observe(ctx, observation); err != nil {
-		return ctrl.Result{}, err
+		return r.finish(ctx, target, status.failed("WorkflowFailed", "Failed to persist observed evidence"), err)
 	}
 	incident, err := r.Workflow.Claim(ctx, observation.Key())
 	if err != nil {
-		return ctrl.Result{}, err
+		return r.finish(ctx, target, status.failed("WorkflowFailed", "Failed to evaluate or claim recovery workflow"), err)
 	}
 	if incident == nil {
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		return r.finish(ctx, target, status, nil)
 	}
 	if err = r.Execute(ctx, &deployment, *incident); err != nil {
-		// Transient API errors retain the execution key for bounded service retries.
 		if !errors.Is(err, ErrUnsafePlan) {
-			return ctrl.Result{}, err
+			return r.finish(ctx, target, status.failed("ExecutionUncertain", "Kubernetes action failed or its outcome is uncertain; durable operation key is retained"), err)
 		}
 		if failErr := r.Workflow.Fail(ctx, incident.ID, err.Error()); failErr != nil {
-			return ctrl.Result{}, fmt.Errorf("execution: %v; persist failure: %w", err, failErr)
+			return r.finish(ctx, target, status.failed("WorkflowFailed", "Could not persist rejected execution"), errors.Join(err, failErr))
 		}
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		status.Reconciled = "False"
+		status.Reason = "ExecutionRejected"
+		status.Message = err.Error()
+		return r.finish(ctx, target, status, nil)
 	}
 	if err = r.Workflow.MarkVerifying(ctx, incident.ID); err != nil {
-		return ctrl.Result{}, err
+		return r.finish(ctx, target, status.failed("WorkflowFailed", "Action submitted but verification state could not be persisted"), err)
 	}
-	return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	status.Ready = "Unknown"
+	status.Reason = "VerificationPending"
+	status.Message = "Recovery action accepted; a new live Deployment observation is required"
+	return r.finish(ctx, target, status, nil)
+}
+
+func (r *TargetReconciler) reader() client.Reader {
+	if r.Reader != nil {
+		return r.Reader
+	}
+	return r.Client
 }
 
 func (r *TargetReconciler) observe(d *appsv1.Deployment, container, image string) (core.Observation, error) {
@@ -135,7 +153,7 @@ func (r *TargetReconciler) observe(d *appsv1.Deployment, container, image string
 	if d.Annotations["argocd.argoproj.io/tracking-id"] != "" {
 		gitops = true
 	}
-	return core.Observation{Cluster: r.ClusterID, Namespace: d.Namespace, Name: d.Name, UID: string(d.UID), ResourceVersion: d.ResourceVersion, Image: current, HealthyImage: image, Container: container, Generation: d.Generation, ObservedGeneration: d.Status.ObservedGeneration, Desired: desired, Available: d.Status.AvailableReplicas, Updated: d.Status.UpdatedReplicas, OptIn: d.Labels[OptInLabel] == "true", GitOps: gitops, At: now, ExecutionKey: d.Spec.Template.Annotations[ExecutionAnnotation]}, nil
+	return core.Observation{Cluster: r.ClusterID, Namespace: d.Namespace, Name: d.Name, UID: string(d.UID), ResourceVersion: d.ResourceVersion, Image: current, HealthyImage: image, Container: container, Generation: d.Generation, ObservedGeneration: d.Status.ObservedGeneration, Desired: desired, Replicas: d.Status.Replicas, Available: d.Status.AvailableReplicas, Updated: d.Status.UpdatedReplicas, OptIn: d.Labels[OptInLabel] == "true", GitOps: gitops, At: now, ExecutionKey: d.Spec.Template.Annotations[ExecutionAnnotation]}, nil
 }
 
 type patchOperation struct {
@@ -200,7 +218,7 @@ func (r *TargetReconciler) Execute(ctx context.Context, d *appsv1.Deployment, in
 	if d.Spec.Template.Annotations == nil {
 		operations = append(operations, patchOperation{"add", "/spec/template/metadata/annotations", map[string]string{ExecutionAnnotation: incident.ExecutionKey}})
 	} else {
-		operations = append(operations, patchOperation{"add", "/spec/template/metadata/annotations/resilienceplane.io~1execution-key", incident.ExecutionKey})
+		operations = append(operations, patchOperation{"add", "/spec/template/metadata/annotations/trs.io~1execution-key", incident.ExecutionKey})
 	}
 	payload, err := json.Marshal(operations)
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ATLURI0001/resilienceplane/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

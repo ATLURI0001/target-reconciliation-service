@@ -30,13 +30,13 @@ spec:
             - secretRef:
                 name: {{ .Values.existingSecret }}
           env:
-            - name: RP_LISTEN
+            - name: TRS_LISTEN
               value: 0.0.0.0:8080
-            - name: RP_KUBERNETES
+            - name: TRS_KUBERNETES
               value: {{ .Values.kubernetesEnabled | quote }}
-            - name: RP_NAMESPACE
+            - name: TRS_NAMESPACE
               value: {{ .Values.managedNamespace | quote }}
-            - name: RP_CLUSTER_ID
+            - name: TRS_CLUSTER_ID
               value: {{ .Values.clusterID | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

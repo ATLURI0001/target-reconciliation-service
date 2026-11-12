@@ -1,0 +1,3 @@
+PASS: 26 JSON/YAML files parsed (Helm templates linted/rendered separately).
+PASS: shell syntax for scripts/*.sh.
+Docker build context explicitly excludes .lab, .env, dependency/tool directories, and key/kubeconfig patterns. Runtime Docker build remains blocked.

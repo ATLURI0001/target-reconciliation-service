@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ATLURI0001/resilienceplane/internal/core"
-	"github.com/ATLURI0001/resilienceplane/internal/store"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/store"
 	"github.com/jackc/pgx/v5"
 	"io"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -114,7 +114,7 @@ func TestEnvtestAtomicPatch(t *testing.T) {
 			}
 		}
 		scopedConfig := rest.CopyConfig(cfg)
-		scopedConfig.Impersonate = rest.ImpersonationConfig{UserName: "system:serviceaccount:rp-demo:resilienceplane-controller", Groups: []string{"system:serviceaccounts", "system:serviceaccounts:rp-demo", "system:authenticated"}}
+		scopedConfig.Impersonate = rest.ImpersonationConfig{UserName: "system:serviceaccount:trs-demo:target-reconciliation-service-controller", Groups: []string{"system:serviceaccounts", "system:serviceaccounts:trs-demo", "system:authenticated"}}
 		scoped, err := client.New(scopedConfig, client.Options{Scheme: s})
 		if err != nil {
 			t.Fatal(err)
@@ -127,6 +127,19 @@ func TestEnvtestAtomicPatch(t *testing.T) {
 		if err := scoped.Patch(ctx, &allowed, client.MergeFrom(d.DeepCopy())); err != nil {
 			t.Fatalf("scoped deployment patch failed: %v", err)
 		}
+		statusTarget := Target(DemoNamespace, "rbac-status", d.Name, "catalog", goodImage)
+		if err := c.Create(ctx, statusTarget); err != nil {
+			t.Fatal(err)
+		}
+		statusReconciler := &TargetReconciler{Client: scoped, Reader: scoped}
+		if err := statusReconciler.publishStatus(ctx, statusTarget, unknownStatus("ObservationUnavailable", "RBAC status check")); err != nil {
+			t.Fatalf("scoped status patch denied: %v", err)
+		}
+		statusTarget = readTarget(t, c, client.ObjectKeyFromObject(statusTarget))
+		_ = unstructured.SetNestedField(statusTarget.Object, "different-container", "spec", "container")
+		if err := scoped.Update(ctx, statusTarget); !apierrors.IsForbidden(err) {
+			t.Fatalf("spec mutation should remain forbidden: %v", err)
+		}
 		var secret corev1.Secret
 		if err := scoped.Get(ctx, types.NamespacedName{Namespace: DemoNamespace, Name: "not-readable"}, &secret); !apierrors.IsForbidden(err) {
 			t.Fatalf("expected secret denial, got %v", err)
@@ -136,6 +149,7 @@ func TestEnvtestAtomicPatch(t *testing.T) {
 			t.Fatalf("expected protected-namespace denial, got %v", err)
 		}
 	})
+	t.Run("StatusConditions", func(t *testing.T) { testRealStatusConditions(t, c) })
 	t.Run("CRDSchema", func(t *testing.T) {
 		invalid := Target(DemoNamespace, "invalid", "catalog", "catalog", "nginx:latest")
 		if err := c.Create(ctx, invalid); err == nil || !apierrors.IsInvalid(err) {
@@ -306,5 +320,95 @@ func testRealAPIWorkflow(t *testing.T, c client.Client, repository core.Store, n
 	}
 	if len(state.Audit) < 6 {
 		t.Fatalf("audit missing workflow: %+v", state.Audit)
+	}
+}
+
+func testRealStatusConditions(t *testing.T, c client.Client) {
+	ctx := context.Background()
+	d := sampleDeployment()
+	d.Name = "status-conditions-catalog"
+	d.UID = ""
+	d.ResourceVersion = ""
+	d.Generation = 0
+	if err := c.Create(ctx, d); err != nil {
+		t.Fatal(err)
+	}
+	target := Target(DemoNamespace, "status-conditions-target", d.Name, "catalog", goodImage)
+	if err := c.Create(ctx, target); err != nil {
+		t.Fatal(err)
+	}
+	generation := target.GetGeneration()
+	now := time.Date(2026, 11, 12, 0, 0, 0, 0, time.UTC)
+	r := &TargetReconciler{Client: c, Reader: c, Workflow: &workflowStub{}, ClusterID: "envtest", Now: func() time.Time { return now }}
+	request := ctrl.Request{NamespacedName: client.ObjectKeyFromObject(target)}
+	if _, err := r.Reconcile(ctx, request); err != nil {
+		t.Fatal(err)
+	}
+	initial := readTarget(t, c, request.NamespacedName)
+	if initial.GetGeneration() != generation || condition(t, initial, "Ready").Status != metav1.ConditionFalse {
+		t.Fatalf("initial status/generation invalid: %+v", initial.Object)
+	}
+	// Status writes on the main resource must be ignored by a real API server.
+	mainUpdate := initial.DeepCopy()
+	_ = unstructured.SetNestedSlice(mainUpdate.Object, []any{}, "status", "conditions")
+	if err := c.Update(ctx, mainUpdate); err != nil {
+		t.Fatal(err)
+	}
+	if after := readTarget(t, c, request.NamespacedName); condition(t, after, "Ready").Status != metav1.ConditionFalse {
+		t.Fatal("main resource update bypassed status subresource")
+	}
+	if err := c.Get(ctx, client.ObjectKeyFromObject(d), d); err != nil {
+		t.Fatal(err)
+	}
+	healthyStatus(d)
+	if err := c.Status().Update(ctx, d); err != nil {
+		t.Fatal(err)
+	}
+	now = now.Add(time.Minute)
+	if _, err := r.Reconcile(ctx, request); err != nil {
+		t.Fatal(err)
+	}
+	ready := readTarget(t, c, request.NamespacedName)
+	readyCondition := condition(t, ready, "Ready")
+	if ready.GetGeneration() != generation || readyCondition.Status != metav1.ConditionTrue || readyCondition.ObservedGeneration != generation {
+		t.Fatalf("healthy condition=%+v generation=%d", readyCondition, ready.GetGeneration())
+	}
+	rv := ready.GetResourceVersion()
+	now = now.Add(time.Minute)
+	if _, err := r.Reconcile(ctx, request); err != nil {
+		t.Fatal(err)
+	}
+	if stable := readTarget(t, c, request.NamespacedName); stable.GetResourceVersion() != rv {
+		t.Fatal("unchanged live status generated a write")
+	}
+	// A genuine spec change increments generation exactly once; a following
+	// status reconciliation must report it without incrementing it again.
+	_ = unstructured.SetNestedField(ready.Object, "registry.example/catalog@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "spec", "healthyImage")
+	if err := c.Update(ctx, ready); err != nil {
+		t.Fatal(err)
+	}
+	nextGeneration := ready.GetGeneration()
+	if nextGeneration <= generation {
+		t.Fatal("spec change failed to advance generation")
+	}
+	if _, err := r.Reconcile(ctx, request); err != nil {
+		t.Fatal(err)
+	}
+	next := readTarget(t, c, request.NamespacedName)
+	nextCondition := condition(t, next, "Ready")
+	if next.GetGeneration() != nextGeneration || nextCondition.ObservedGeneration != nextGeneration || !nextCondition.LastTransitionTime.Equal(&readyCondition.LastTransitionTime) {
+		t.Fatalf("generation/transition handling invalid: %+v", next.Object)
+	}
+	r.Reader = unavailableDeploymentReader{Reader: c}
+	if _, err := r.Reconcile(ctx, request); err == nil {
+		t.Fatal("live reader error lost")
+	}
+	unavailable := readTarget(t, c, request.NamespacedName)
+	if condition(t, unavailable, "Ready").Status != metav1.ConditionUnknown {
+		t.Fatal("unknown live evidence still advertised ready")
+	}
+	last, _, _ := unstructured.NestedMap(unavailable.Object, "status", "lastObservation")
+	if last["deploymentUID"] != string(d.UID) {
+		t.Fatal("last successful evidence lost")
 	}
 }

@@ -71,7 +71,7 @@ func allowed(s *State, o Observation, now time.Time) string {
 	if !ok || c.Environment != "test" {
 		return "unregistered or non-test cluster"
 	}
-	if !slices.Contains(p.Namespaces, o.Namespace) || o.Namespace == "kube-system" || o.Namespace == "default" || o.Namespace == "resilienceplane" {
+	if !slices.Contains(p.Namespaces, o.Namespace) || o.Namespace == "kube-system" || o.Namespace == "default" || o.Namespace == "target-reconciliation-service" {
 		return "namespace not permitted"
 	}
 	if !o.OptIn || o.GitOps {
@@ -156,7 +156,7 @@ func (v *Service) Observe(ctx context.Context, o Observation) error {
 		if reason != "" {
 			state = "Rejected"
 		}
-		plan := Plan{Action: "rollback", Reason: "Deployment remains unavailable across fresh observations; operator-declared recovery digest differs from deployed image", Target: o, Image: o.HealthyImage, RequiresApproval: true, Verification: "same deployment UID and container, approved replica count, execution annotation, recovery image, observed generation and all desired updated replicas available", Abort: "cancel before execution; in-flight API requests cannot be retracted; inspect deployment before further intervention"}
+		plan := Plan{Action: "rollback", Reason: "Deployment rollout remains incomplete across fresh observations; operator-declared recovery digest differs from deployed image", Target: o, Image: o.HealthyImage, RequiresApproval: true, Verification: "same deployment UID and container, approved replica count, execution annotation, recovery image, observed generation, no old replicas, and all desired updated replicas available", Abort: "cancel before execution; in-flight API requests cannot be retracted; inspect deployment before further intervention"}
 		i := Incident{ID: id(), Target: key, State: state, Plan: plan, Created: now, Updated: now, Error: reason}
 		s.Incidents[i.ID] = i
 		audit(s, now, "controller", "incident.detect", i.ID, state)

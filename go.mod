@@ -1,4 +1,4 @@
-module github.com/ATLURI0001/resilienceplane
+module github.com/ATLURI0001/target-reconciliation-service
 
 go 1.27.4
 

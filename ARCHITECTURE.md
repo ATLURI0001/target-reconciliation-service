@@ -1,10 +1,10 @@
 # Architecture
 
-ResiliencePlane is an early control-plane implementation. The current executable slice handles one local cluster; multi-cloud and multi-cluster are target architecture, not demonstrated capacity.
+TargetReconciliationService is an early control-plane implementation. The current executable slice handles one local cluster; multi-cloud and multi-cluster are target architecture, not demonstrated capacity.
 
 ```mermaid
 flowchart TD
-  Console["Next.js console and rpctl"] --> API["Authenticated Go management API"]
+  Console["Next.js console and trsctl"] --> API["Authenticated Go management API"]
   API --> Core["Policy and durable workflow service"]
   Controller["Namespace-scoped controller-runtime reconciler"] --> Core
   Core --> Database["PostgreSQL state and audit transactions"]
@@ -24,7 +24,7 @@ A cluster has a test-only environment and observation heartbeat. A ReliabilityTa
 
 An unready rollout must remain unready across fresh observations for the configured detection window. A telemetry gap restarts that window. A healthy workload clears its failure episode. Incidents are deduplicated per target episode. Ordinary same-image failures do not create executable restart proposals: Kubernetes retains ordinary healing responsibility.
 
-The deterministic plan records evidence, action, namespace/cluster scope, reasoning, approval, verification, and abort semantics. Its known-good image is declared by a trusted operator, not inferred or certified by ResiliencePlane. Approval checks current policy and evidence again. Default dry-run records the decision without executable admission. After disabling dry-run, an explicit second approval of a DryRun incident is necessary.
+The deterministic plan records evidence, action, namespace/cluster scope, reasoning, approval, verification, and abort semantics. Its known-good image is declared by a trusted operator, not inferred or certified by TargetReconciliationService. Approval checks current policy and evidence again. Default dry-run records the decision without executable admission. After disabling dry-run, an explicit second approval of a DryRun incident is necessary.
 
 ```mermaid
 stateDiagram-v2
@@ -65,3 +65,10 @@ The whole-state JSON aggregate is a deliberate correctness-first limitation. Rea
 ## Future event architecture
 
 PostgreSQL remains source of truth. A transactional outbox will publish versioned immutable events to NATS JetStream; consumers use explicit acknowledgements, bounded redelivery, deduplication and a dead-letter workflow. Per-target order and optimistic versions must be checked by consumers. No event bus is needed or claimed operational in this initial slice. See ADRs and ROADMAP.
+
+
+## CRD conditions in TRS 0.2
+
+ReliabilityTarget uses Kubernetes' status subresource and condition conventions. Status observedGeneration identifies the CR spec version evaluated, distinct from the observed Deployment generation. Ready reports rollout readiness; Reconciled reports whether the controller pass completed successfully, not whether an operator authorized remediation. Unknown Deployment reads do not become healthy when the status endpoint remains writable. If the entire API server is unreachable, no controller can persist a new condition; backend telemetry freshness remains the authority for staleness. Conditions retain lastTransitionTime when their truth value is unchanged and are only patched when status changes; generation predicates avoid status-induced event loops while periodic polling continues. The CRD schema and scoped Role explicitly expose status permissions.
+
+Rollout health requires observedGeneration at least the Deployment's current generation, total replicas equal to desired, updated replicas equal to desired, and enough available replicas. This is deliberately stricter than aggregate availability: an old healthy replica plus an unready new replica must not satisfy recovery verification. It is still Deployment-level evidence, not request-level application health.

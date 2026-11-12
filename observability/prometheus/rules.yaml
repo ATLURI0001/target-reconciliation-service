@@ -1,29 +1,29 @@
 groups:
-  - name: resilienceplane-core
+  - name: target-reconciliation-service-core
     rules:
-      - alert: ResiliencePlaneAPIUnavailable
-        expr: up{job="resilienceplane"} == 0
+      - alert: TargetReconciliationServiceAPIUnavailable
+        expr: up{job="target-reconciliation-service"} == 0
         for: 30s
         labels:
           severity: warning
         annotations:
           summary: Control-plane metrics cannot be scraped
           description: Check API process and network before interpreting missing workload telemetry.
-      - alert: ResiliencePlaneTelemetryStale
-        expr: time() - resilienceplane_cluster_last_seen_seconds > 30
+      - alert: TargetReconciliationServiceTelemetryStale
+        expr: time() - trs_cluster_last_seen_seconds > 30
         for: 20s
         labels:
           severity: warning
         annotations:
           summary: Cluster telemetry is stale under the default 30-second freshness policy
           description: This is an observation gap, not evidence that the cluster or workload is unavailable. Update this alert if policy freshness changes.
-      - alert: ResiliencePlaneDeploymentUnavailable
-        expr: resilienceplane_deployment_available_replicas < resilienceplane_deployment_desired_replicas
+      - alert: TargetReconciliationServiceDeploymentUnavailable
+        expr: trs_deployment_available_replicas < trs_deployment_desired_replicas
         for: 30s
         labels:
           severity: warning
         annotations:
           summary: Observed Deployment availability is below desired replicas
           description: Verify telemetry freshness, generation, and rollout state before approving recovery.
-      - record: resilienceplane:http_failure_ratio5m
-        expr: rate(resilienceplane_http_failures_total[5m]) / clamp_min(rate(resilienceplane_http_requests_total[5m]), 0.000001)
+      - record: target-reconciliation-service:http_failure_ratio5m
+        expr: rate(trs_http_failures_total[5m]) / clamp_min(rate(trs_http_requests_total[5m]), 0.000001)

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ATLURI0001/resilienceplane/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
 )
 
 func TestMemoryTransactionalContract(t *testing.T) { testContract(t, NewMemory()) }

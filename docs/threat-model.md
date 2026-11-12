@@ -21,3 +21,6 @@ All remediation is restricted to test environments and default dry-run. There ar
 This is an early lab project. Do not expose it to untrusted networks or grant production credentials. Apache-2.0 source licensing does not override external component or dependency license obligations. See NOTICE and web/VERIFICATION.md for attribution review limits.
 
 Configuration is validated before database initialization: a dedicated DATABASE_URL is required explicitly; invalid boolean/namespace settings and weak or identical development tokens fail startup before any migration. This avoids relying on libpq/pgx default database discovery or silently disabling Kubernetes integration on a misspelled option.
+
+
+The TRS CI workflow uses disposable hosted runners with read-only repository permissions, immutable action pins and no persisted checkout credentials. Fork pull requests receive no project secrets. The local lab generates private runtime credentials and kubeconfig under ignored `.lab/`; that directory is also explicitly excluded from Docker build contexts and CI evidence uploads. A Docker-capable host is still required to execute and validate these runtime boundaries.

@@ -4,7 +4,7 @@ import os
 import urllib.error
 import urllib.request
 
-origin = os.environ.get("RP_CONSOLE_URL", "http://127.0.0.1:3000")
+origin = os.environ.get("TRS_CONSOLE_URL", "http://127.0.0.1:3000")
 opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 results = []
 for path, method, expected in [("/", "GET", 200), ("/api/snapshot", "GET", 401), ("/api/snapshot", "POST", 405)]:
@@ -16,5 +16,6 @@ for path, method, expected in [("/", "GET", 200), ("/api/snapshot", "GET", 401),
     assert status == expected, (path, status, expected)
     if path == "/":
         assert "Reliability overview" in body and "No snapshot loaded" in body
+        assert "TargetReconciliationService" in body and "TRS" in body
     results.append({"path": path, "method": method, "status": status, "expected": expected, "passed": True})
 print(json.dumps(results, indent=2))

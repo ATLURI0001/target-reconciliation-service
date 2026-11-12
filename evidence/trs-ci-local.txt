@@ -1,0 +1,19 @@
+mkdir -p bin
+go build -trimpath -o bin/target-reconciliation-service ./cmd/target-reconciliation-service
+go build -trimpath -o bin/trsctl ./cmd/trsctl
+go test ./...
+ok  	github.com/ATLURI0001/target-reconciliation-service/cmd/target-reconciliation-service	0.016s
+?   	github.com/ATLURI0001/target-reconciliation-service/cmd/trsctl	[no test files]
+ok  	github.com/ATLURI0001/target-reconciliation-service/controllers	6.640s
+ok  	github.com/ATLURI0001/target-reconciliation-service/internal/core	0.018s
+ok  	github.com/ATLURI0001/target-reconciliation-service/internal/httpapi	0.003s
+ok  	github.com/ATLURI0001/target-reconciliation-service/internal/store	0.080s
+ok  	github.com/ATLURI0001/target-reconciliation-service/tests	0.042s
+go vet ./...
+cmp config/crd/reliabilitytargets.yaml deploy/helm/target-reconciliation-service/crds/reliabilitytargets.yaml
+helm lint deploy/helm/target-reconciliation-service
+==> Linting deploy/helm/target-reconciliation-service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+helm template target-reconciliation-service deploy/helm/target-reconciliation-service --include-crds > /tmp/target-reconciliation-service-rendered.yaml

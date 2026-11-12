@@ -12,3 +12,10 @@ bin
 web/.next
 web/*.txt
 **/__pycache__
+
+# Temporary lab credentials and kubeconfig must never enter build contexts.
+.lab
+repository.bundle
+**/*.kubeconfig
+**/*.pem
+**/*.key

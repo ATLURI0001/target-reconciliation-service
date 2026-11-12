@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ATLURI0001/resilienceplane/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
 )
 
 type API struct {
@@ -234,27 +234,27 @@ func (a *API) metrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
-	fmt.Fprintf(w, "# TYPE resilienceplane_http_requests_total counter\nresilienceplane_http_requests_total %d\n# TYPE resilienceplane_http_failures_total counter\nresilienceplane_http_failures_total %d\n", a.requests.Load(), a.failures.Load())
-	fmt.Fprintln(w, "# TYPE resilienceplane_cluster_last_seen_seconds gauge")
+	fmt.Fprintf(w, "# TYPE trs_http_requests_total counter\ntrs_http_requests_total %d\n# TYPE trs_http_failures_total counter\ntrs_http_failures_total %d\n", a.requests.Load(), a.failures.Load())
+	fmt.Fprintln(w, "# TYPE trs_cluster_last_seen_seconds gauge")
 	for _, c := range s.Clusters {
 		ts := float64(0)
 		if !c.LastSeen.IsZero() {
 			ts = float64(c.LastSeen.Unix())
 		}
-		fmt.Fprintf(w, "resilienceplane_cluster_last_seen_seconds{cluster=%s} %g\n", strconv.Quote(c.ID), ts)
+		fmt.Fprintf(w, "trs_cluster_last_seen_seconds{cluster=%s} %g\n", strconv.Quote(c.ID), ts)
 	}
-	fmt.Fprintln(w, "# TYPE resilienceplane_deployment_available_replicas gauge\n# TYPE resilienceplane_deployment_desired_replicas gauge")
+	fmt.Fprintln(w, "# TYPE trs_deployment_available_replicas gauge\n# TYPE trs_deployment_desired_replicas gauge")
 	for _, o := range s.Observations {
 		labels := fmt.Sprintf("cluster=%s,namespace=%s,deployment=%s", strconv.Quote(o.Cluster), strconv.Quote(o.Namespace), strconv.Quote(o.Name))
-		fmt.Fprintf(w, "resilienceplane_deployment_available_replicas{%s} %d\nresilienceplane_deployment_desired_replicas{%s} %d\n", labels, o.Available, labels, o.Desired)
+		fmt.Fprintf(w, "trs_deployment_available_replicas{%s} %d\ntrs_deployment_desired_replicas{%s} %d\n", labels, o.Available, labels, o.Desired)
 	}
-	fmt.Fprintln(w, "# TYPE resilienceplane_incidents gauge")
+	fmt.Fprintln(w, "# TYPE trs_incidents gauge")
 	counts := map[string]int{}
 	for _, i := range s.Incidents {
 		counts[i.State]++
 	}
 	for state, count := range counts {
-		fmt.Fprintf(w, "resilienceplane_incidents{state=%s} %d\n", strconv.Quote(state), count)
+		fmt.Fprintf(w, "trs_incidents{state=%s} %d\n", strconv.Quote(state), count)
 	}
 }
 

@@ -1,0 +1,9 @@
+make: Entering directory '/workspace/scratch/38d2eb11c8fe/target-reconciliation-service'
+cmp config/crd/reliabilitytargets.yaml deploy/helm/target-reconciliation-service/crds/reliabilitytargets.yaml
+helm lint deploy/helm/target-reconciliation-service
+==> Linting deploy/helm/target-reconciliation-service
+[INFO] Chart.yaml: icon is recommended
+
+1 chart(s) linted, 0 chart(s) failed
+helm template target-reconciliation-service deploy/helm/target-reconciliation-service --include-crds > /tmp/target-reconciliation-service-rendered.yaml
+make: Leaving directory '/workspace/scratch/38d2eb11c8fe/target-reconciliation-service'

@@ -1,0 +1,67 @@
+=== RUN   TestEnvtestAtomicPatch
+=== RUN   TestEnvtestAtomicPatch/NamespaceRBAC
+=== RUN   TestEnvtestAtomicPatch/StatusConditions
+=== RUN   TestEnvtestAtomicPatch/CRDSchema
+=== RUN   TestEnvtestAtomicPatch/WorkflowWithExplicitStatusInput
+=== RUN   TestEnvtestAtomicPatch/WorkflowWithPostgresAndExplicitStatusInput
+    envtest_test.go:166: TEST_DATABASE_URL absent; real PostgreSQL workflow not run
+--- PASS: TestEnvtestAtomicPatch (7.03s)
+    --- PASS: TestEnvtestAtomicPatch/NamespaceRBAC (2.07s)
+    --- PASS: TestEnvtestAtomicPatch/StatusConditions (0.16s)
+    --- PASS: TestEnvtestAtomicPatch/CRDSchema (0.00s)
+    --- PASS: TestEnvtestAtomicPatch/WorkflowWithExplicitStatusInput (0.13s)
+    --- SKIP: TestEnvtestAtomicPatch/WorkflowWithPostgresAndExplicitStatusInput (0.00s)
+=== RUN   TestStatusHealthTransitionsNoopAndGeneration
+--- PASS: TestStatusHealthTransitionsNoopAndGeneration (0.15s)
+=== RUN   TestStatusUnknownOnUnavailablePreservesEvidence
+--- PASS: TestStatusUnknownOnUnavailablePreservesEvidence (0.00s)
+=== RUN   TestStatusSpecInvalidAndRollingSurgeNotReady
+--- PASS: TestStatusSpecInvalidAndRollingSurgeNotReady (0.01s)
+=== RUN   TestStatusConflictRetryAndOriginalErrorPreserved
+--- PASS: TestStatusConflictRetryAndOriginalErrorPreserved (0.02s)
+=== RUN   TestStatusGenerationFenceAndWatchPredicate
+--- PASS: TestStatusGenerationFenceAndWatchPredicate (0.00s)
+=== RUN   TestStatusWorkflowFailure
+--- PASS: TestStatusWorkflowFailure (0.01s)
+=== RUN   TestReconcileReadsTargetDeploymentAndPassesObservation
+--- PASS: TestReconcileReadsTargetDeploymentAndPassesObservation (0.01s)
+=== RUN   TestRollbackFakeClientAndIdempotentReplay
+--- PASS: TestRollbackFakeClientAndIdempotentReplay (0.00s)
+=== RUN   TestExecutionGuards
+=== RUN   TestExecutionGuards/uid
+=== RUN   TestExecutionGuards/namespace
+=== RUN   TestExecutionGuards/optin
+=== RUN   TestExecutionGuards/gitops
+=== RUN   TestExecutionGuards/flux
+=== RUN   TestExecutionGuards/image_drift
+=== RUN   TestExecutionGuards/unpinned_image
+=== RUN   TestExecutionGuards/generation_drift
+=== RUN   TestExecutionGuards/replica_drift
+=== RUN   TestExecutionGuards/not_executing
+=== RUN   TestExecutionGuards/no_key
+--- PASS: TestExecutionGuards (0.00s)
+    --- PASS: TestExecutionGuards/uid (0.00s)
+    --- PASS: TestExecutionGuards/namespace (0.00s)
+    --- PASS: TestExecutionGuards/optin (0.00s)
+    --- PASS: TestExecutionGuards/gitops (0.00s)
+    --- PASS: TestExecutionGuards/flux (0.00s)
+    --- PASS: TestExecutionGuards/image_drift (0.00s)
+    --- PASS: TestExecutionGuards/unpinned_image (0.00s)
+    --- PASS: TestExecutionGuards/generation_drift (0.00s)
+    --- PASS: TestExecutionGuards/replica_drift (0.00s)
+    --- PASS: TestExecutionGuards/not_executing (0.00s)
+    --- PASS: TestExecutionGuards/no_key (0.00s)
+=== RUN   TestPatchHasAtomicPreconditions
+--- PASS: TestPatchHasAtomicPreconditions (0.00s)
+=== RUN   TestUnknownDeploymentNeverReportsHealthy
+--- PASS: TestUnknownDeploymentNeverReportsHealthy (0.01s)
+=== RUN   TestInvalidTargetRejected
+--- PASS: TestInvalidTargetRejected (0.01s)
+=== RUN   TestPatchErrorPropagates
+--- PASS: TestPatchErrorPropagates (0.00s)
+=== RUN   TestUnavailableLiveReaderNeverRefreshesCachedObservation
+--- PASS: TestUnavailableLiveReaderNeverRefreshesCachedObservation (0.00s)
+=== RUN   TestWorkflowDetectionApprovalRollbackVerificationAndAudit
+--- PASS: TestWorkflowDetectionApprovalRollbackVerificationAndAudit (0.03s)
+PASS
+ok  	github.com/ATLURI0001/target-reconciliation-service/controllers	7.316s

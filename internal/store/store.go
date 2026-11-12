@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ATLURI0001/resilienceplane/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
 )
 
 var ErrAuditMutation = errors.New("committed audit history cannot be changed")

@@ -18,3 +18,5 @@ __pycache__/
 *.tsbuildinfo
 
 repository.bundle
+
+.lab/

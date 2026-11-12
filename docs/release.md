@@ -1,6 +1,6 @@
 # Public release checklist
 
-The current repository is a private prepared source artifact,0.1.0-dev. No remote repository, public package, image or tag was created.
+The current repository is a private prepared source artifact,0.2.0-dev. No remote repository, public package, image or tag was created.
 
 Before publishing: recheck provisional name; review Apache-2.0 original source and all dependency/container/optional-component licenses; inspect secrets and build outputs; execute the fresh Docker/Kind recovery scenario; run full Jenkins chain with credentials scoped outside source; scan dependencies/images, produce reviewed SBOM/provenance, sign immutable image digest; verify install/upgrade/teardown and supported platforms; update known limitations, changelog and machine status; review branch protection and security-reporting channel.
 
@@ -13,4 +13,4 @@ Proposed publication steps, only after explicit authorization:
 
 A passing source-level test suite does not establish production readiness or complete dependency license approval. Do not label this release enterprise-ready or claim demonstrated large-scale capacity.
 
-The source ZIP includes `repository.bundle` with local history. To restore that history without contacting GitHub, run `git clone /path/to/extracted/resilienceplane/repository.bundle resilienceplane-checkout`. The extracted source tree is also directly buildable. Creating any remote repository or pushing still requires explicit authorization.
+The source ZIP includes `repository.bundle` with local history. To restore that history without contacting GitHub, run `git clone /path/to/extracted/target-reconciliation-service/repository.bundle target-reconciliation-service-checkout`. The extracted source tree is also directly buildable. Creating any remote repository or pushing still requires explicit authorization.

@@ -1,0 +1,10 @@
+TargetReconciliationService console 0.2.0-dev
+UTC: 2026-11-12T12:00:10.291541+00:00
+Command: npm run typecheck
+Exit: 0
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> target-reconciliation-service-console@0.2.0-dev typecheck
+> tsc --noEmit
+

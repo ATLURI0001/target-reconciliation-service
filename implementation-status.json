@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "project": "ResiliencePlane",
-  "version": "0.1.0-dev",
-  "updated": "2026-11-11",
-  "brand": "provisional: exact searches inconclusive; no uniqueness claim",
+  "project": "TargetReconciliationService",
+  "version": "0.2.0-dev",
+  "updated": "2026-11-12",
+  "brand": "user-selected; no exclusivity or domain-ownership claim",
   "publication": {
     "remoteCreated": false,
     "codePublished": false,
     "cloudProvisioned": false,
     "taggedRelease": false
   },
-  "milestone": "Initial control-plane vertical slice implemented and integration-tested; live pod recovery blocked",
+  "milestone": "TRS rename, native CRD conditions and push/PR CI/lab implementation; Docker/Kind execution remains blocked",
   "allowedStatuses": [
     "implemented",
     "partially implemented",
@@ -28,7 +28,7 @@
       "id": 2,
       "name": "Kubernetes CRDs and controllers",
       "status": "implemented",
-      "evidenceOrBoundary": "ReliabilityTarget, uncached observations, namespace-scoped rollback and actual API integration"
+      "evidenceOrBoundary": "CRD/controller plus native status conditions, real API/PG tests, scoped status RBAC; no kubelet/live-Pod demonstration"
     },
     {
       "id": 3,
@@ -40,7 +40,7 @@
       "id": 4,
       "name": "API and management CLI",
       "status": "implemented",
-      "evidenceOrBoundary": "Local-token API and rpctl; alpha endpoint scope"
+      "evidenceOrBoundary": "Local-token API and trsctl; alpha endpoint scope"
     },
     {
       "id": 5,
@@ -64,7 +64,7 @@
       "id": 8,
       "name": "Docker and local environments",
       "status": "partially implemented",
-      "evidenceOrBoundary": "Configuration supplied; runtime build/Compose/Kind blocked by absent Docker daemon"
+      "evidenceOrBoundary": "Resource-limited Docker/Compose and isolated Kind lab scripts; genuine local runtime startup blocked"
     },
     {
       "id": 9,
@@ -76,7 +76,7 @@
       "id": 10,
       "name": "Jenkins pipeline",
       "status": "partially implemented",
-      "evidenceOrBoundary": "Validation/scanning/build/SBOM source; no actual Jenkins execution/publication"
+      "evidenceOrBoundary": "Jenkins source plus new GitHub Actions push/PR workflow; local commands and actionlint pass; hosted execution pending"
     },
     {
       "id": 11,
@@ -148,7 +148,7 @@
       "id": 22,
       "name": "GitHub community and release assets",
       "status": "partially implemented",
-      "evidenceOrBoundary": "Apache2/community/templates/Jenkins prepared; no remote, release or tag"
+      "evidenceOrBoundary": "Community/release assets and pinned read-only Actions workflow prepared; no remote repository, tag or publication"
     }
   ],
   "phases": [
@@ -204,29 +204,63 @@
     }
   ],
   "blockedValidation": [
-    "Docker image/Compose runtime",
-    "Live Kind workload rollout and request recovery",
-    "Two-cluster failover",
-    "Jenkins/GitHub/Argo CD end-to-end delivery",
-    "Grafana runtime and browser visual inspection",
-    "Full source-callgraph vulnerability scan (resource termination)"
+    "Docker Compose/container image/Kind live runtime and successful demo.sh run",
+    "Hosted GitHub Actions execution (not published or triggered)",
+    "Two-cluster failover and advanced roadmap features",
+    "Browser visual inspection",
+    "Full source-callgraph security scanning (historical resource termination; no fresh source scan)"
   ],
-  "nextMilestone": "Fresh developer-machine Docker/Kind lab: real failed workload, denied mutation, approved rollback, observed readiness and console timeline; record request health/RTO separately",
+  "nextMilestone": "On a Docker-capable host run make lab-up, make lab-demo, make lab-down; retain successful real-Pod/HTTP/approval/recovery evidence; after authorized publication verify both GitHub Actions jobs on the final commit.",
   "statusReport": "docs/verification.md",
   "continuation": "docs/development-progress.md",
   "verification": {
-    "goBuild": "passed",
-    "raceSuiteWithRealPostgreSQLAndKubernetesAPI": "passed",
-    "topLevelTests": 30,
+    "localBuildTestLintHelm": "passed",
+    "goRaceSuiteActualPostgreSQLAndKubernetesAPI": "passed",
+    "topLevelGoTests": 37,
     "integrationSkips": 0,
-    "httpCLIAndNextProxy": "passed",
-    "databaseBackupRestore": "passed",
+    "crdStatusConditionsAndRBAC": "passed",
+    "actualGoCLIAndNextProxy": "passed",
     "helmLintRender": "passed",
-    "prometheusRuleValidation": "passed",
-    "consoleBuildTypecheckModelTests": "passed",
-    "goBinaryVulnerabilityScan": "no vulnerabilities reported",
+    "githubWorkflowActionlint": "passed",
+    "consoleProductionBuildTypecheck": "passed",
+    "consoleModelTests": 7,
     "npmProductionAudit": "0 reported vulnerabilities",
-    "sourceCallgraphScan": "blocked: resource termination",
-    "livePodsAndDocker": "blocked: runtime absent"
-  }
+    "goBinaryScan": "current API binary: no known vulnerabilities reported",
+    "liveDockerKindAndDemo": "blocked; actual rootless and lab launch failures preserved",
+    "hostedActionsRun": "not executed; source not published"
+  },
+  "abbreviation": "TRS",
+  "repository": "target-reconciliation-service",
+  "goModule": "github.com/ATLURI0001/target-reconciliation-service",
+  "cli": "trsctl",
+  "helmChart": "target-reconciliation-service",
+  "crdGroup": "reliability.trs.io",
+  "annotation": "trs.io/execution-key",
+  "dockerImage": "target-reconciliation-service",
+  "requestedEnhancements": [
+    {
+      "name": "Docker/Kind actually executing demo.sh",
+      "status": "blocked",
+      "detail": "Genuine rootless startup failed at UID mapping; cgroup2 mount denied. No successful demo run exists. Isolated lab scripts and Docker-backed hosted job supplied.",
+      "evidence": [
+        "evidence/trs-docker-attempt.txt",
+        "evidence/trs-lab-attempt.txt"
+      ]
+    },
+    {
+      "name": "GitHub Actions push/PR workflow",
+      "status": "implemented",
+      "detail": "Build/test/lint/race/Helm, PostgreSQL/envtest/image job plus Kind live-demo job; actionlint and local core command set pass. No hosted run triggered."
+    },
+    {
+      "name": "CRD status conditions",
+      "status": "implemented",
+      "detail": "Native status subresource, Ready/Reconciled conditions, observedGeneration, stable transition times, optimistic retries, scoped RBAC, no-op status writes; real API tests pass."
+    },
+    {
+      "name": "Rename to TargetReconciliationService",
+      "status": "implemented",
+      "detail": "Module, binaries/CLI, chart, API group, annotations, configuration, metrics, console and documentation updated. Historical evidence and durable SQL identifiers intentionally preserved."
+    }
+  ]
 }

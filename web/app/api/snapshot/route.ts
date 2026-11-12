@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   }
   try {
     // Backend origin is server configuration, never a browser-controlled query parameter.
-    const origin = new URL(process.env.RP_API_URL ?? "http://127.0.0.1:8080");
+    const origin = new URL(process.env.TRS_API_URL ?? "http://127.0.0.1:8080");
     if (!["http:", "https:"].includes(origin.protocol) || origin.username || origin.password) throw new Error("Invalid backend URL");
     const upstream = await fetch(new URL("/v1/snapshot", origin), {
       headers: {authorization, accept: "application/json"}, cache: "no-store",

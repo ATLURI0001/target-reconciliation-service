@@ -1,0 +1,20 @@
+{
+  "api": "PASS",
+  "postgresPersistence": "PASS",
+  "viewerMutationDenied": "PASS",
+  "unobservedClusterNotHealthy": "PASS",
+  "semanticValidation": "PASS",
+  "auditPagination": "PASS",
+  "metrics": "PASS",
+  "goCLI": "PASS",
+  "requestSample": {
+    "kind": "sequential loopback HTTP snapshot, PostgreSQL-backed; not a load capacity test",
+    "requests": 30,
+    "registeredClusters": 58,
+    "observedTargets": 3,
+    "auditEventsShown": 32,
+    "medianMs": 0.927,
+    "p95Ms": 1.294
+  },
+  "nextToGoToPostgres": "PASS"
+}

@@ -3,9 +3,9 @@ package tests
 import (
 	"context"
 	"fmt"
-	"github.com/ATLURI0001/resilienceplane/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
 
-	"github.com/ATLURI0001/resilienceplane/internal/store"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/store"
 
 	"testing"
 )
@@ -15,7 +15,7 @@ func BenchmarkMemoryInventory1000(b *testing.B) {
 	db := store.NewMemory()
 	_ = db.Update(context.Background(), func(s *core.State) error {
 		for i := 0; i < 1000; i++ {
-			o := core.Observation{Cluster: "bench", Name: fmt.Sprintf("deployment-%d", i), Namespace: "rp-demo", Desired: 1}
+			o := core.Observation{Cluster: "bench", Name: fmt.Sprintf("deployment-%d", i), Namespace: "trs-demo", Desired: 1, Replicas: 1}
 			s.Observations[o.Key()] = o
 		}
 		return nil

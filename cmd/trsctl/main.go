@@ -1,4 +1,4 @@
-// rpctl is a deliberately small local management API client.
+// trsctl is a deliberately small local management API client.
 package main
 
 import (
@@ -14,19 +14,19 @@ import (
 )
 
 func request(args []string) error {
-	base := os.Getenv("RP_API_URL")
+	base := os.Getenv("TRS_API_URL")
 	if base == "" {
 		base = "http://127.0.0.1:8080"
 	}
 	origin, e := url.Parse(base)
 	if e != nil || origin.Host == "" || origin.User != nil {
-		return fmt.Errorf("invalid RP_API_URL")
+		return fmt.Errorf("invalid TRS_API_URL")
 	}
 	if origin.Scheme != "https" && !(origin.Scheme == "http" && (origin.Hostname() == "127.0.0.1" || origin.Hostname() == "localhost")) {
 		return fmt.Errorf("TLS required outside localhost")
 	}
 	if len(args) == 0 {
-		return fmt.Errorf("usage: rpctl snapshot | audit | register ID | policy FILE | approve ID | cancel ID")
+		return fmt.Errorf("usage: trsctl snapshot | audit | register ID | policy FILE | approve ID | cancel ID")
 	}
 	method, path, body := "GET", "/v1/snapshot", []byte(nil)
 	switch args[0] {
@@ -59,9 +59,9 @@ func request(args []string) error {
 	default:
 		return fmt.Errorf("unknown command")
 	}
-	token := os.Getenv("RP_TOKEN")
+	token := os.Getenv("TRS_TOKEN")
 	if token == "" {
-		return fmt.Errorf("set RP_TOKEN (viewer for reads, operator for changes)")
+		return fmt.Errorf("set TRS_TOKEN (viewer for reads, operator for changes)")
 	}
 	req, e := http.NewRequest(method, strings.TrimRight(base, "/")+path, bytes.NewReader(body))
 	if e != nil {

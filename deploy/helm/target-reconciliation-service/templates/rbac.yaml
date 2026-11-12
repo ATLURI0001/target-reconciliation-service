@@ -7,9 +7,12 @@ rules:
   - apiGroups: ["apps"]
     resources: ["deployments"]
     verbs: ["get", "list", "watch", "patch"]
-  - apiGroups: ["reliability.resilienceplane.io"]
+  - apiGroups: ["reliability.trs.io"]
     resources: ["reliabilitytargets"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["reliability.trs.io"]
+    resources: ["reliabilitytargets/status"]
+    verbs: ["get", "patch", "update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

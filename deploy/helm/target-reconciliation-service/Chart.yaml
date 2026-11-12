@@ -1,6 +1,6 @@
 apiVersion: v2
-name: resilienceplane
+name: target-reconciliation-service
 description: Experimental namespace-scoped reliability workflow control plane
 type: application
-version: 0.1.0
-appVersion: 0.1.0-dev
+version: 0.2.0
+appVersion: 0.2.0-dev

@@ -6,7 +6,7 @@ Deployment observations every five seconds; both target and Deployment reads
 use the manager's **uncached APIReader**. The cache supplies watch events only;
 API connectivity loss cannot restamp cached state as fresh. Failed live reads
 produce no observation or execution claim. Errors enter controller-runtime's
-rate-limited retry queue. It deliberately supports only `rp-demo`.
+rate-limited retry queue. It deliberately supports only `trs-demo`.
 
 A target names a Deployment, container and a **known-good digest-pinned image**.
 The reference demo script resolves the actual image digest from running Pods,
@@ -28,7 +28,7 @@ validation because our own successful image change increases generation.
 No Kubernetes mutation endpoint is exposed to external agents. The controller
 uses its local scoped credential; an outbound authenticated agent remains
 planned. Role resource scope cannot constrain patch to a single label; the
-`rp-demo` Role therefore is an explicit trust boundary. Restrict who can create
+`trs-demo` Role therefore is an explicit trust boundary. Restrict who can create
 ReliabilityTarget resources and modify the namespace. Argo/Flux owners are
 rejected; arbitrary unlabelled external owners cannot be reliably detected.
 
@@ -59,3 +59,50 @@ kubelet or Deployment controller. These tests establish API/storage integration,
 not a successful Pod rollout, application service recovery, or measured RTO.
 `evidence/kubernetes-postgres-envtest.txt` records the actual successful run using
 Kubernetes 1.35.0, etcd 3.6.6 and PostgreSQL 17.11. No Kind runtime was available.
+
+## ReliabilityTarget status contract
+
+`ReliabilityTarget` exposes a real Kubernetes `/status` subresource. Its
+`status.observedGeneration` and each condition's `observedGeneration` identify
+the **CR generation evaluated**, including an invalid spec or failed attempt.
+They are distinct from the referenced Deployment's generation.
+
+| Condition | Meaning |
+| --- | --- |
+| `Ready=True` | The uncached Deployment observation satisfies the strict rollout predicate: observed generation caught up, total and updated replicas equal desired, and desired replicas are available. |
+| `Ready=False` | The Deployment is known absent or the fresh Deployment observation does not satisfy that predicate. |
+| `Ready=Unknown` | The live observation, specification or workflow cannot establish readiness, or a recovery action awaits a fresh verification observation. |
+| `Reconciled=True` | This controller pass recorded its observation and evaluated the workflow, or submitted the authorized action for verification. This is not a statement that remediation was authorized or recovery completed. |
+| `Reconciled=False` | Observation, spec validation, workflow persistence/evaluation or execution failed or was rejected. |
+
+Reasons include `DeploymentReady`, `RolloutIncomplete`,
+`DeploymentNotFound`, `ObservationUnavailable`, `SpecInvalid`, `WorkflowFailed`,
+`ExecutionRejected`, `ExecutionUncertain` and `VerificationPending`.
+`lastTransitionTime` changes only when a condition's True/False/Unknown status
+changes; a reason, message or generation change retains that time.
+
+`status.lastObservation` retains the last successfully read Deployment evidence,
+including its UID, generation, replica counts and image. It deliberately has no
+per-poll timestamp; backend observation timestamps remain the source for data
+freshness. Unknown observations preserve this historical evidence. During a
+complete Kubernetes API outage, publishing Unknown may itself fail; existing
+status then remains historical and must not be treated as a live heartbeat.
+
+Status patches reread the CR without the cache, fence its UID and generation,
+and use optimistic resourceVersion locking with conflict retries. Unchanged
+status causes no patch. Status write errors preserve the original reconciliation
+error. Watches filter status-only changes with `GenerationChangedPredicate`;
+regular successful reconciliation still schedules a five-second poll.
+
+Inspect the result with:
+
+```sh
+kubectl -n trs-demo get reliabilitytargets
+kubectl -n trs-demo get reliabilitytarget catalog -o yaml
+```
+
+Consumers must check that the Ready condition's `observedGeneration` equals
+`metadata.generation` before interpreting it as the current desired spec.
+A Deployment-only status update never increments the CR generation. A CR
+status-only write also leaves CR `metadata.generation` unchanged; the real API
+integration tests verify both the subresource boundary and generation behavior.

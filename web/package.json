@@ -1,6 +1,6 @@
 {
-  "name": "resilienceplane-console",
-  "version": "0.1.0-dev",
+  "name": "target-reconciliation-service-console",
+  "version": "0.2.0-dev",
   "private": true,
   "engines": {
     "node": ">=22.13.0"

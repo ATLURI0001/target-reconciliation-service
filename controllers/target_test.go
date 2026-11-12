@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ATLURI0001/resilienceplane/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,7 +60,7 @@ func plan(r *TargetReconciler, d *appsv1.Deployment) core.Incident {
 func TestReconcileReadsTargetDeploymentAndPassesObservation(t *testing.T) {
 	d := sampleDeployment()
 	target := Target(DemoNamespace, "separate-target-name", "catalog", "catalog", goodImage)
-	c := fake.NewClientBuilder().WithScheme(scheme(t)).WithObjects(d, target).Build()
+	c := fake.NewClientBuilder().WithScheme(scheme(t)).WithStatusSubresource(target).WithObjects(d, target).Build()
 	w := &workflowStub{}
 	r := &TargetReconciler{Client: c, Workflow: w, ClusterID: "local", Now: func() time.Time { return time.Unix(100, 0) }}
 	result, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Namespace: DemoNamespace, Name: target.GetName()}})
@@ -170,7 +170,7 @@ func TestPatchHasAtomicPreconditions(t *testing.T) {
 }
 func TestUnknownDeploymentNeverReportsHealthy(t *testing.T) {
 	target := Target(DemoNamespace, "target", "missing", "catalog", goodImage)
-	c := fake.NewClientBuilder().WithScheme(scheme(t)).WithObjects(target).Build()
+	c := fake.NewClientBuilder().WithScheme(scheme(t)).WithStatusSubresource(target).WithObjects(target).Build()
 	w := &workflowStub{}
 	r := &TargetReconciler{Client: c, Workflow: w, ClusterID: "local"}
 	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Namespace: DemoNamespace, Name: "target"}})
@@ -180,7 +180,7 @@ func TestUnknownDeploymentNeverReportsHealthy(t *testing.T) {
 }
 func TestInvalidTargetRejected(t *testing.T) {
 	target := Target(DemoNamespace, "target", "catalog", "catalog", "nginx:latest")
-	c := fake.NewClientBuilder().WithScheme(scheme(t)).WithObjects(target).Build()
+	c := fake.NewClientBuilder().WithScheme(scheme(t)).WithStatusSubresource(target).WithObjects(target).Build()
 	w := &workflowStub{}
 	r := &TargetReconciler{Client: c, Workflow: w}
 	_, err := r.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Namespace: DemoNamespace, Name: "target"}})
@@ -213,7 +213,7 @@ func TestUnavailableLiveReaderNeverRefreshesCachedObservation(t *testing.T) {
 	// produced from that cached snapshot.
 	d := sampleDeployment()
 	target := Target(DemoNamespace, "target", "catalog", "catalog", goodImage)
-	cached := fake.NewClientBuilder().WithScheme(scheme(t)).WithObjects(d, target).Build()
+	cached := fake.NewClientBuilder().WithScheme(scheme(t)).WithStatusSubresource(target).WithObjects(d, target).Build()
 	workflow := &workflowStub{}
 	reconciler := &TargetReconciler{Client: cached, Reader: unavailableDeploymentReader{Reader: cached}, Workflow: workflow, ClusterID: "local"}
 	_, err := reconciler.Reconcile(context.Background(), ctrl.Request{NamespacedName: types.NamespacedName{Namespace: DemoNamespace, Name: "target"}})

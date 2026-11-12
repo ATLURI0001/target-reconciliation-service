@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ATLURI0001/resilienceplane/internal/core"
-	"github.com/ATLURI0001/resilienceplane/internal/store"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/store"
 )
 
 // TestPostgresWorkflow exercises the actual durable service and SQL repository.
@@ -43,7 +43,7 @@ func TestPostgresWorkflow(t *testing.T) {
 		t.Fatal(err)
 	}
 	recoveryImage := "example.invalid/catalog@sha256:" + strings.Repeat("a", 64)
-	observation := core.Observation{Cluster: clusterID, Namespace: "rp-demo", Name: "catalog", UID: "workflow-test-uid", ResourceVersion: "1", Image: "example.invalid/catalog:failed-release", HealthyImage: recoveryImage, Container: "catalog", Generation: 2, ObservedGeneration: 2, Desired: 1, Available: 0, Updated: 0, OptIn: true}
+	observation := core.Observation{Cluster: clusterID, Namespace: "trs-demo", Name: "catalog", UID: "workflow-test-uid", ResourceVersion: "1", Image: "example.invalid/catalog:failed-release", HealthyImage: recoveryImage, Container: "catalog", Generation: 2, ObservedGeneration: 2, Desired: 1, Replicas: 1, Available: 0, Updated: 0, OptIn: true}
 	if err = service.Observe(ctx, observation); err != nil {
 		t.Fatal(err)
 	}

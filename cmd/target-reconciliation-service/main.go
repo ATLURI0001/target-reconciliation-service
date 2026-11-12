@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ATLURI0001/resilienceplane/controllers"
-	"github.com/ATLURI0001/resilienceplane/internal/core"
-	"github.com/ATLURI0001/resilienceplane/internal/httpapi"
-	"github.com/ATLURI0001/resilienceplane/internal/store"
+	"github.com/ATLURI0001/target-reconciliation-service/controllers"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/httpapi"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/store"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -31,15 +31,15 @@ func validateEnvironment() error {
 	if os.Getenv("DATABASE_URL") == "" {
 		return errors.New("DATABASE_URL must explicitly select a dedicated database")
 	}
-	operator, viewer := os.Getenv("RP_OPERATOR_TOKEN"), os.Getenv("RP_VIEWER_TOKEN")
+	operator, viewer := os.Getenv("TRS_OPERATOR_TOKEN"), os.Getenv("TRS_VIEWER_TOKEN")
 	if len(operator) < 32 || len(viewer) < 32 || operator == viewer {
 		return errors.New("distinct operator and viewer tokens of at least 32 bytes required")
 	}
-	if k := env("RP_KUBERNETES", "false"); k != "true" && k != "false" {
-		return errors.New("RP_KUBERNETES must be true or false")
+	if k := env("TRS_KUBERNETES", "false"); k != "true" && k != "false" {
+		return errors.New("TRS_KUBERNETES must be true or false")
 	}
-	if env("RP_KUBERNETES", "false") == "true" && env("RP_NAMESPACE", "rp-demo") != "rp-demo" {
-		return errors.New("initial controller only supports rp-demo")
+	if env("TRS_KUBERNETES", "false") == "true" && env("TRS_NAMESPACE", "trs-demo") != "trs-demo" {
+		return errors.New("initial controller only supports trs-demo")
 	}
 	return nil
 }
@@ -57,12 +57,12 @@ func run() error {
 	}
 	defer db.Close()
 	svc := core.NewService(db)
-	api, err := httpapi.New(svc, os.Getenv("RP_OPERATOR_TOKEN"), os.Getenv("RP_VIEWER_TOKEN"))
+	api, err := httpapi.New(svc, os.Getenv("TRS_OPERATOR_TOKEN"), os.Getenv("TRS_VIEWER_TOKEN"))
 	if err != nil {
 		return err
 	}
 	failures := make(chan error, 2)
-	if env("RP_KUBERNETES", "false") == "true" {
+	if env("TRS_KUBERNETES", "false") == "true" {
 		cfg, err := ctrl.GetConfig()
 		if err != nil {
 			return errors.New("Kubernetes configuration unavailable")
@@ -71,15 +71,15 @@ func run() error {
 		if err = clientgoscheme.AddToScheme(scheme); err != nil {
 			return err
 		}
-		namespace := env("RP_NAMESPACE", "rp-demo")
-		if namespace != "rp-demo" {
-			return errors.New("initial controller only supports rp-demo")
+		namespace := env("TRS_NAMESPACE", "trs-demo")
+		if namespace != "trs-demo" {
+			return errors.New("initial controller only supports trs-demo")
 		}
-		mgr, err := ctrl.NewManager(cfg, ctrl.Options{Scheme: scheme, Cache: cache.Options{DefaultNamespaces: map[string]cache.Config{namespace: {}}}, LeaderElection: true, LeaderElectionNamespace: namespace, LeaderElectionID: "resilienceplane-controller", Metrics: server.Options{BindAddress: "0"}, HealthProbeBindAddress: "0"})
+		mgr, err := ctrl.NewManager(cfg, ctrl.Options{Scheme: scheme, Cache: cache.Options{DefaultNamespaces: map[string]cache.Config{namespace: {}}}, LeaderElection: true, LeaderElectionNamespace: namespace, LeaderElectionID: "target-reconciliation-service-controller", Metrics: server.Options{BindAddress: "0"}, HealthProbeBindAddress: "0"})
 		if err != nil {
 			return err
 		}
-		cluster := env("RP_CLUSTER_ID", "local")
+		cluster := env("TRS_CLUSTER_ID", "local")
 		if err = svc.Register(ctx, core.Identity{Subject: "controller-bootstrap", Role: "operator"}, core.Cluster{ID: cluster, Environment: "test"}); err != nil {
 			return err
 		}
@@ -88,7 +88,7 @@ func run() error {
 		}
 		go func() { failures <- mgr.Start(ctx) }()
 	}
-	srv := &http.Server{Addr: env("RP_LISTEN", "127.0.0.1:8080"), Handler: api.Handler(), ReadHeaderTimeout: 3 * time.Second, ReadTimeout: 6 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 16384}
+	srv := &http.Server{Addr: env("TRS_LISTEN", "127.0.0.1:8080"), Handler: api.Handler(), ReadHeaderTimeout: 3 * time.Second, ReadTimeout: 6 * time.Second, WriteTimeout: 10 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 16384}
 	go func() {
 		slog.Info("api listening", "address", srv.Addr, "auth", "local development tokens")
 		failures <- srv.ListenAndServe()

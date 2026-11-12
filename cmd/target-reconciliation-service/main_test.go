@@ -12,15 +12,15 @@ func TestConfigurationFailsBeforeDatabaseAccess(t *testing.T) {
 	}{
 		{"valid", "DATABASE_URL", "postgres://placeholder/isolated", false},
 		{"explicit database", "DATABASE_URL", "", true},
-		{"weak token", "RP_OPERATOR_TOKEN", "short", true},
-		{"distinct roles", "RP_VIEWER_TOKEN", strings.Repeat("o", 32), true},
-		{"boolean", "RP_KUBERNETES", "maybe", true},
+		{"weak token", "TRS_OPERATOR_TOKEN", "short", true},
+		{"distinct roles", "TRS_VIEWER_TOKEN", strings.Repeat("o", 32), true},
+		{"boolean", "TRS_KUBERNETES", "maybe", true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Setenv("DATABASE_URL", "postgres://placeholder/isolated")
-			t.Setenv("RP_OPERATOR_TOKEN", strings.Repeat("o", 32))
-			t.Setenv("RP_VIEWER_TOKEN", strings.Repeat("v", 32))
-			t.Setenv("RP_KUBERNETES", "false")
+			t.Setenv("TRS_OPERATOR_TOKEN", strings.Repeat("o", 32))
+			t.Setenv("TRS_VIEWER_TOKEN", strings.Repeat("v", 32))
+			t.Setenv("TRS_KUBERNETES", "false")
 			t.Setenv(tc.key, tc.value)
 			if (validateEnvironment() != nil) != tc.wantError {
 				t.Fatal("configuration validation mismatch")
@@ -29,10 +29,10 @@ func TestConfigurationFailsBeforeDatabaseAccess(t *testing.T) {
 	}
 	t.Run("namespace", func(t *testing.T) {
 		t.Setenv("DATABASE_URL", "postgres://placeholder/isolated")
-		t.Setenv("RP_OPERATOR_TOKEN", strings.Repeat("o", 32))
-		t.Setenv("RP_VIEWER_TOKEN", strings.Repeat("v", 32))
-		t.Setenv("RP_KUBERNETES", "true")
-		t.Setenv("RP_NAMESPACE", "kube-system")
+		t.Setenv("TRS_OPERATOR_TOKEN", strings.Repeat("o", 32))
+		t.Setenv("TRS_VIEWER_TOKEN", strings.Repeat("v", 32))
+		t.Setenv("TRS_KUBERNETES", "true")
+		t.Setenv("TRS_NAMESPACE", "kube-system")
 		if validateEnvironment() == nil {
 			t.Fatal("unsafe namespace")
 		}

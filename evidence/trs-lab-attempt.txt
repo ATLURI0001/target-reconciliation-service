@@ -1,0 +1,8 @@
+Command: make lab-up
+Expected real local lab attempt; no Docker daemon was available.
+Exit code: 2
+./scripts/lab-up.sh
+permission denied while trying to connect to the docker API at unix:///var/run/docker.sock
+make: *** [Makefile:54: lab-up] Error 1
+
+No .lab state or lab credentials were created.

@@ -1,7 +1,7 @@
 pipeline {
-  agent { label 'resilienceplane-build' }
+  agent { label 'target-reconciliation-service-build' }
   options { timeout(time: 25, unit: 'MINUTES'); disableConcurrentBuilds() }
-  environment { IMAGE = "resilienceplane:ci-${BUILD_NUMBER}" }
+  environment { IMAGE = "target-reconciliation-service:ci-${BUILD_NUMBER}" }
   stages {
     stage('Checkout') { steps { checkout scm } }
     stage('Prerequisites') { steps { sh 'go version && docker version && helm version && trivy --version && syft version' } }

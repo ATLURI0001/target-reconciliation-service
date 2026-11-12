@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ATLURI0001/resilienceplane/internal/core"
-	"github.com/ATLURI0001/resilienceplane/internal/store"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
+	"github.com/ATLURI0001/target-reconciliation-service/internal/store"
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -36,7 +36,7 @@ func TestWorkflowDetectionApprovalRollbackVerificationAndAudit(t *testing.T) {
 	}
 	d := sampleDeployment()
 	target := Target(DemoNamespace, "catalog-health", "catalog", "catalog", goodImage)
-	c := fake.NewClientBuilder().WithScheme(scheme(t)).WithStatusSubresource(&appsv1.Deployment{}).WithObjects(d, target).Build()
+	c := fake.NewClientBuilder().WithScheme(scheme(t)).WithStatusSubresource(&appsv1.Deployment{}).WithStatusSubresource(target).WithObjects(d, target).Build()
 	reconciler := &TargetReconciler{Client: c, Workflow: svc, ClusterID: "local", Now: func() time.Time { return now }}
 	req := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: DemoNamespace, Name: "catalog-health"}}
 	reconcile := func() {
