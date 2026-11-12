@@ -1,6 +1,20 @@
 # TargetReconciliationService
 
-**A Kubernetes-native reliability control plane with policy-governed, auditable recovery.**
+<p align="center">
+  <img src="docs/assets/banner.svg" alt="TargetReconciliationService Banner" width="100%" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/ATLURI0001/target-reconciliation-service/actions"><img src="https://img.shields.io/badge/CI-GitHub%20Actions-blue?logo=githubactions&logoColor=white" alt="CI" /></a>
+  <a href="go.mod"><img src="https://img.shields.io/badge/Go-1.24%2B-00ADD8?logo=go&logoColor=white" alt="Go" /></a>
+  <a href="config/crd/reliabilitytargets.yaml"><img src="https://img.shields.io/badge/Kubernetes-CRD%20Reconciler-326CE5?logo=kubernetes&logoColor=white" alt="Kubernetes" /></a>
+  <a href="internal/store/migrations/001_initial.sql"><img src="https://img.shields.io/badge/PostgreSQL-Immutable%20Audit-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
+  <a href="web"><img src="https://img.shields.io/badge/Next.js-Console-black?logo=next.js&logoColor=white" alt="Next.js" /></a>
+  <a href="observability"><img src="https://img.shields.io/badge/Metrics-Prometheus%20%26%20Grafana-E6522C?logo=prometheus&logoColor=white" alt="Observability" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-green.svg" alt="License" /></a>
+</p>
+
+---
 
 TargetReconciliationService coordinates observation, incident detection, proposed recovery, authorization, execution and verification. It addresses the gap between deployment failure signals and accountable operational intervention: who approved the change, what evidence justified it, what actually changed, and whether the selected target recovered.
 
@@ -18,19 +32,37 @@ TargetReconciliationService coordinates observation, incident detection, propose
 
 The original product logic is the transactional policy/admission/workflow model and its Kubernetes execution/verification bridge. Kubernetes still schedules/heals workloads, PostgreSQL owns persistence, and future GitOps changes belong to GitOps controllers.
 
+## Workflow & Rollback Lifecycle
+
+The control plane implements an end-to-end, policy-governed state machine: from fresh sustained failure detection through deterministic rollback proposal, operator authorization, atomic digest execution, and closed-loop replica verification.
+
+<p align="center">
+  <img src="docs/assets/workflow-lifecycle.svg" alt="Policy-Governed Incident Lifecycle & Rollback Workflow" width="100%" />
+</p>
+
 ## Architecture
 
-```mermaid
-flowchart TD
-  UI["Console and CLI"] --> API["Go management API"]
-  API --> Workflow["Policy, plans, approvals and audit"]
-  Reconciler["Kubernetes reconciler"] --> Workflow
-  Workflow --> PG["PostgreSQL transactions"]
-  Reconciler --> K8s["ReliabilityTarget and Deployment API"]
-  K8s --> Reconciler
-```
+TargetReconciliationService maintains strict transactional isolation between Kubernetes runtime controllers and policy state.
 
-Read ARCHITECTURE.md for consistency, replay, dispatch and scale boundaries. The current bridge watches one local test namespace; outbound agents and multi-cluster operations are planned.
+<p align="center">
+  <img src="docs/assets/architecture.svg" alt="Control Plane Architecture" width="100%" />
+</p>
+
+Read [ARCHITECTURE.md](ARCHITECTURE.md) for consistency, replay, dispatch and scale boundaries. The current bridge watches one local test namespace; outbound agents and multi-cluster operations are planned.
+
+## Metrics & Observability
+
+TargetReconciliationService exposes real-time Prometheus metrics (`/metrics`) and includes a pre-configured Grafana dashboard for telemetry freshness, replica convergence, and immutable audit logs.
+
+<p align="center">
+  <img src="docs/assets/metrics-dashboard.svg" alt="Core Reliability & Observability Dashboard" width="100%" />
+</p>
+
+- **Telemetry Freshness**: Alert fires when `time() - trs_cluster_last_seen_seconds > 30s`.
+- **Replica Convergence**: Tracks `trs_deployment_available_replicas` against `trs_deployment_desired_replicas`.
+- **Audit Stream**: Real-time event timeline mirrored directly from the PostgreSQL `rp_audit` append-only table.
+
+See [observability/README.md](observability/README.md) for Prometheus configuration and alert verification rules.
 
 ## Changes in 0.2.0-dev
 

@@ -1,0 +1,206 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="dashBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="panelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#182234"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="greenArea" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
+    </linearGradient>
+    <linearGradient id="redArea" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0.0"/>
+    </linearGradient>
+    <linearGradient id="blueArea" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"/>
+    </linearGradient>
+    <filter id="panelShadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="600" rx="16" fill="url(#dashBg)"/>
+
+  <!-- Grafana-style Header -->
+  <g transform="translate(30, 24)">
+    <!-- Dashboard Title -->
+    <rect x="0" y="0" width="32" height="32" rx="6" fill="#f59e0b" fill-opacity="0.15"/>
+    <path d="M 6 22 L 13 14 L 19 18 L 26 10" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="44" y="22" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="700" fill="#f8fafc">TargetReconciliationService · Core Reliability &amp; Observability</text>
+    
+    <!-- Time range selector -->
+    <g transform="translate(860, 2)">
+      <rect width="180" height="28" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <circle cx="16" cy="14" r="4" fill="#10b981"/>
+      <text x="28" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#cbd5e1">Last 30m • Refresh 5s</text>
+    </g>
+  </g>
+
+  <!-- Stat Banner Row -->
+  <g transform="translate(30, 75)">
+    <!-- Metric 1: System Status -->
+    <g transform="translate(0, 0)">
+      <rect width="245" height="70" rx="8" fill="url(#panelGrad)" stroke="#334155" stroke-width="1" filter="url(#panelShadow)"/>
+      <text x="16" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="0.5">CONTROL PLANE STATUS</text>
+      <text x="16" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="700" fill="#34d399">HEALTHY</text>
+      <circle cx="115" cy="46" r="5" fill="#10b981"/>
+      <text x="130" y="51" font-family="monospace" font-size="11" fill="#64748b">up=1</text>
+    </g>
+
+    <!-- Metric 2: Telemetry Freshness -->
+    <g transform="translate(265, 0)">
+      <rect width="245" height="70" rx="8" fill="url(#panelGrad)" stroke="#334155" stroke-width="1" filter="url(#panelShadow)"/>
+      <text x="16" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="0.5">TELEMETRY FRESHNESS</text>
+      <text x="16" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="700" fill="#38bdf8">1.8s</text>
+      <text x="68" y="51" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">threshold &lt; 30s</text>
+    </g>
+
+    <!-- Metric 3: Active Reliability Targets -->
+    <g transform="translate(530, 0)">
+      <rect width="245" height="70" rx="8" fill="url(#panelGrad)" stroke="#334155" stroke-width="1" filter="url(#panelShadow)"/>
+      <text x="16" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="0.5">MANAGED TARGETS</text>
+      <text x="16" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="700" fill="#818cf8">8 Registered</text>
+      <text x="150" y="51" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">100% Opt-In</text>
+    </g>
+
+    <!-- Metric 4: Recovery Success -->
+    <g transform="translate(795, 0)">
+      <rect width="245" height="70" rx="8" fill="url(#panelGrad)" stroke="#334155" stroke-width="1" filter="url(#panelShadow)"/>
+      <text x="16" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="0.5">ROLLBACK VERIFICATION</text>
+      <text x="16" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="20" font-weight="700" fill="#f59e0b">100%</text>
+      <text x="80" y="51" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">0 unverified</text>
+    </g>
+  </g>
+
+  <!-- Main Chart Row -->
+  <g transform="translate(30, 165)">
+    <!-- Chart 1: Deployment Replicas Convergence (Available vs Desired) -->
+    <g transform="translate(0, 0)">
+      <rect width="510" height="210" rx="8" fill="url(#panelGrad)" stroke="#334155" stroke-width="1" filter="url(#panelShadow)"/>
+      <text x="16" y="25" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Deployment Replicas (Available vs Desired)</text>
+      <text x="16" y="42" font-family="monospace" font-size="10" fill="#64748b">trs_deployment_available_replicas vs trs_deployment_desired_replicas</text>
+
+      <!-- Chart axes & grid -->
+      <g transform="translate(45, 60)">
+        <line x1="0" y1="0" x2="440" y2="0" stroke="#1e293b" stroke-width="1"/>
+        <line x1="0" y1="35" x2="440" y2="35" stroke="#1e293b" stroke-width="1"/>
+        <line x1="0" y1="70" x2="440" y2="70" stroke="#1e293b" stroke-width="1"/>
+        <line x1="0" y1="105" x2="440" y2="105" stroke="#334155" stroke-width="1"/>
+
+        <!-- Y labels -->
+        <text x="-25" y="5" font-family="monospace" font-size="10" fill="#64748b">3.0</text>
+        <text x="-25" y="40" font-family="monospace" font-size="10" fill="#64748b">2.0</text>
+        <text x="-25" y="75" font-family="monospace" font-size="10" fill="#64748b">1.0</text>
+        <text x="-25" y="109" font-family="monospace" font-size="10" fill="#64748b">0.0</text>
+
+        <!-- Desired line (constant 3) -->
+        <line x1="0" y1="0" x2="440" y2="0" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+        <!-- Failure & Rollback curve -->
+        <!-- Starts healthy at 3 -> drops to 0 at failure -> recovery executed -> rises back to 3 -->
+        <path d="M 0 0 L 100 0 L 120 105 L 260 105 L 300 0 L 440 0" fill="none" stroke="#10b981" stroke-width="2.5"/>
+        <path d="M 120 105 L 260 105" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+
+        <!-- Markers and annotations -->
+        <circle cx="120" cy="105" r="4" fill="#ef4444"/>
+        <text x="100" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="9" font-weight="600" fill="#f87171">Failed Rollout</text>
+
+        <circle cx="260" cy="105" r="4" fill="#38bdf8"/>
+        <text x="225" y="90" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="9" font-weight="600" fill="#38bdf8">Atomic Rollback</text>
+
+        <circle cx="300" cy="0" r="4" fill="#10b981"/>
+        <text x="310" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="9" font-weight="600" fill="#34d399">Verified 3/3</text>
+      </g>
+    </g>
+
+    <!-- Chart 2: Telemetry Heartbeat & HTTP Metrics -->
+    <g transform="translate(530, 0)">
+      <rect width="510" height="210" rx="8" fill="url(#panelGrad)" stroke="#334155" stroke-width="1" filter="url(#panelShadow)"/>
+      <text x="16" y="25" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Cluster Telemetry Heartbeat Age</text>
+      <text x="16" y="42" font-family="monospace" font-size="10" fill="#64748b">time() - trs_cluster_last_seen_seconds (alert threshold: 30s)</text>
+
+      <g transform="translate(45, 60)">
+        <line x1="0" y1="15" x2="440" y2="15" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <text x="340" y="10" font-family="monospace" font-size="9" fill="#f87171">30s Stale Alert Limit</text>
+
+        <line x1="0" y1="50" x2="440" y2="50" stroke="#1e293b" stroke-width="1"/>
+        <line x1="0" y1="80" x2="440" y2="80" stroke="#1e293b" stroke-width="1"/>
+        <line x1="0" y1="105" x2="440" y2="105" stroke="#334155" stroke-width="1"/>
+
+        <!-- Y labels -->
+        <text x="-25" y="19" font-family="monospace" font-size="10" fill="#64748b">30s</text>
+        <text x="-25" y="55" font-family="monospace" font-size="10" fill="#64748b">15s</text>
+        <text x="-25" y="109" font-family="monospace" font-size="10" fill="#64748b">0s</text>
+
+        <!-- Fresh saw-tooth pattern (reconciliation loops every ~3s) -->
+        <path d="M 0 102 L 30 92 L 31 104 L 70 90 L 71 104 L 110 93 L 111 104 L 150 91 L 151 104 L 190 92 L 191 104 L 230 90 L 231 104 L 270 92 L 271 104 L 310 91 L 311 104 L 350 92 L 351 104 L 390 90 L 391 104 L 430 92" fill="none" stroke="#38bdf8" stroke-width="2"/>
+        <text x="180" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="10" fill="#38bdf8">Continuous sub-second healthy heartbeats</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Live Audit Stream Panel (Bottom) -->
+  <g transform="translate(30, 395)">
+    <rect width="1040" height="180" rx="8" fill="url(#panelGrad)" stroke="#334155" stroke-width="1" filter="url(#panelShadow)"/>
+    <text x="16" y="25" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#f1f5f9">Immutable PostgreSQL Audit Timeline (rp_audit)</text>
+    <text x="16" y="42" font-family="monospace" font-size="10" fill="#64748b">SELECT sequence_id, timestamp, target, action, principal, state FROM rp_audit ORDER BY sequence_id DESC</text>
+
+    <!-- Table Header -->
+    <g transform="translate(16, 60)">
+      <rect width="1008" height="26" fill="#1e293b" rx="4"/>
+      <text x="15" y="17" font-family="monospace" font-size="10" font-weight="700" fill="#94a3b8">SEQ</text>
+      <text x="70" y="17" font-family="monospace" font-size="10" font-weight="700" fill="#94a3b8">TIMESTAMP</text>
+      <text x="210" y="17" font-family="monospace" font-size="10" font-weight="700" fill="#94a3b8">INCIDENT</text>
+      <text x="320" y="17" font-family="monospace" font-size="10" font-weight="700" fill="#94a3b8">TARGET WORKLOAD</text>
+      <text x="500" y="17" font-family="monospace" font-size="10" font-weight="700" fill="#94a3b8">ACTION DISPATCHED</text>
+      <text x="730" y="17" font-family="monospace" font-size="10" font-weight="700" fill="#94a3b8">PRINCIPAL</text>
+      <text x="890" y="17" font-family="monospace" font-size="10" font-weight="700" fill="#94a3b8">STATE</text>
+    </g>
+
+    <!-- Table Rows -->
+    <g transform="translate(16, 92)">
+      <!-- Row 1 -->
+      <g transform="translate(0, 0)">
+        <text x="15" y="14" font-family="monospace" font-size="10" fill="#64748b">#042</text>
+        <text x="70" y="14" font-family="monospace" font-size="10" fill="#cbd5e1">12:38:12 UTC</text>
+        <text x="210" y="14" font-family="monospace" font-size="10" fill="#38bdf8">inc-8902-cat</text>
+        <text x="320" y="14" font-family="monospace" font-size="10" fill="#f8fafc">catalog-deployment</text>
+        <text x="500" y="14" font-family="monospace" font-size="10" fill="#34d399">VERIFICATION_CONFIRMED (3/3)</text>
+        <text x="730" y="14" font-family="monospace" font-size="10" fill="#94a3b8">k8s/reconciler</text>
+        <rect x="888" y="2" width="70" height="18" rx="4" fill="#065f46"/>
+        <text x="902" y="15" font-family="monospace" font-size="9" font-weight="700" fill="#6ee7b7">Resolved</text>
+      </g>
+
+      <!-- Row 2 -->
+      <g transform="translate(0, 24)">
+        <text x="15" y="14" font-family="monospace" font-size="10" fill="#64748b">#041</text>
+        <text x="70" y="14" font-family="monospace" font-size="10" fill="#cbd5e1">12:37:45 UTC</text>
+        <text x="210" y="14" font-family="monospace" font-size="10" fill="#38bdf8">inc-8902-cat</text>
+        <text x="320" y="14" font-family="monospace" font-size="10" fill="#f8fafc">catalog-deployment</text>
+        <text x="500" y="14" font-family="monospace" font-size="10" fill="#60a5fa">DIGEST_ROLLBACK_APPLIED</text>
+        <text x="730" y="14" font-family="monospace" font-size="10" fill="#94a3b8">k8s/reconciler</text>
+        <rect x="888" y="2" width="70" height="18" rx="4" fill="#1e3a8a"/>
+        <text x="900" y="15" font-family="monospace" font-size="9" font-weight="700" fill="#93c5fd">Executing</text>
+      </g>
+
+      <!-- Row 3 -->
+      <g transform="translate(0, 48)">
+        <text x="15" y="14" font-family="monospace" font-size="10" fill="#64748b">#040</text>
+        <text x="70" y="14" font-family="monospace" font-size="10" fill="#cbd5e1">12:37:10 UTC</text>
+        <text x="210" y="14" font-family="monospace" font-size="10" fill="#38bdf8">inc-8902-cat</text>
+        <text x="320" y="14" font-family="monospace" font-size="10" fill="#f8fafc">catalog-deployment</text>
+        <text x="500" y="14" font-family="monospace" font-size="10" fill="#fbbf24">PLAN_APPROVED (dryRun=false)</text>
+        <text x="730" y="14" font-family="monospace" font-size="10" fill="#94a3b8">operator/alex</text>
+        <rect x="888" y="2" width="70" height="18" rx="4" fill="#78350f"/>
+        <text x="902" y="15" font-family="monospace" font-size="9" font-weight="700" fill="#fde68a">Approved</text>
+      </g>
+    </g>
+  </g>
+</svg>

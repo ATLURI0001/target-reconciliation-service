@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 540" width="100%" height="100%">
+  <defs>
+    <linearGradient id="archBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="boxGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="boxShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <marker id="mArrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="mArrowGray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1100" height="540" rx="16" fill="url(#archBg)"/>
+
+  <!-- Header -->
+  <g transform="translate(50, 40)">
+    <text x="0" y="0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#38bdf8" letter-spacing="1.5">CONTROL PLANE ARCHITECTURE</text>
+    <text x="0" y="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="26" font-weight="700" fill="#f8fafc">Component Boundaries &amp; Dataflow</text>
+    <text x="0" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" fill="#94a3b8">Transactional isolation between Kubernetes runtime controllers and policy state.</text>
+  </g>
+
+  <!-- Connectors -->
+  <g transform="translate(50, 140)">
+    <!-- UI to API -->
+    <path d="M 125 110 L 260 110" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#mArrow)"/>
+    
+    <!-- API to Workflow -->
+    <path d="M 440 110 L 530 110" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#mArrow)"/>
+    
+    <!-- Workflow to Postgres -->
+    <path d="M 640 180 L 640 250" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#mArrow)"/>
+
+    <!-- Reconciler to Workflow -->
+    <path d="M 750 110 L 840 110" fill="none" stroke="#818cf8" stroke-width="2" marker-end="url(#mArrow)"/>
+
+    <!-- Reconciler to K8s API -->
+    <path d="M 940 180 L 940 250" fill="none" stroke="#60a5fa" stroke-width="2" marker-end="url(#mArrow)"/>
+  </g>
+
+  <!-- Component Boxes -->
+  <g transform="translate(50, 140)">
+    <!-- BOX 1: CLIENT LAYER -->
+    <g transform="translate(0, 30)">
+      <rect width="180" height="150" rx="10" fill="url(#boxGrad)" stroke="#38bdf8" stroke-width="1.5" filter="url(#boxShadow)"/>
+      <rect x="0" y="0" width="180" height="32" rx="10" fill="#0284c7" fill-opacity="0.15"/>
+      <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#7dd3fc">OPERATOR CLIENTS</text>
+      
+      <rect x="14" y="46" width="152" height="36" rx="6" fill="#111827" stroke="#334155" stroke-width="1"/>
+      <text x="24" y="68" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#f8fafc">Next.js Web Console</text>
+
+      <rect x="14" y="94" width="152" height="36" rx="6" fill="#111827" stroke="#334155" stroke-width="1"/>
+      <text x="24" y="116" font-family="monospace" font-size="12" font-weight="600" fill="#38bdf8">trsctl CLI tool</text>
+    </g>
+
+    <!-- BOX 2: MANAGEMENT API -->
+    <g transform="translate(260, 20)">
+      <rect width="180" height="170" rx="10" fill="url(#boxGrad)" stroke="#475569" stroke-width="1.5" filter="url(#boxShadow)"/>
+      <rect x="0" y="0" width="180" height="32" rx="10" fill="#334155" fill-opacity="0.25"/>
+      <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#f1f5f9">MANAGEMENT API</text>
+      
+      <text x="16" y="55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Go HTTP Server (:8080)</text>
+      <text x="16" y="73" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Token Auth (Viewer/Op)</text>
+      <text x="16" y="91" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Rate Limiter (20 req/s)</text>
+      <text x="16" y="109" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Max 32 concurrency</text>
+      <text x="16" y="127" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Prometheus Metrics</text>
+
+      <rect x="14" y="137" width="152" height="20" rx="4" fill="#0369a1" fill-opacity="0.2"/>
+      <text x="22" y="151" font-family="monospace" font-size="9" fill="#38bdf8">GET /v1/snapshot</text>
+    </g>
+
+    <!-- BOX 3: WORKFLOW ENGINE -->
+    <g transform="translate(530, 20)">
+      <rect width="220" height="170" rx="10" fill="url(#boxGrad)" stroke="#818cf8" stroke-width="1.5" filter="url(#boxShadow)"/>
+      <rect x="0" y="0" width="220" height="32" rx="10" fill="#6366f1" fill-opacity="0.15"/>
+      <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#c7d2fe">CORE WORKFLOW SERVICE</text>
+      
+      <text x="16" y="55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Deterministic Planner</text>
+      <text x="16" y="73" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• DryRun &amp; Approval Engine</text>
+      <text x="16" y="91" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• GitOps Fence Enforcement</text>
+      <text x="16" y="109" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Concurrent Admission Guard</text>
+      <text x="16" y="127" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Verification Evaluator</text>
+    </g>
+
+    <!-- BOX 4: KUBERNETES RECONCILER -->
+    <g transform="translate(840, 20)">
+      <rect width="210" height="170" rx="10" fill="url(#boxGrad)" stroke="#60a5fa" stroke-width="1.5" filter="url(#boxShadow)"/>
+      <rect x="0" y="0" width="210" height="32" rx="10" fill="#2563eb" fill-opacity="0.15"/>
+      <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#bfdbfe">K8s RECONCILER</text>
+      
+      <text x="16" y="55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• controller-runtime</text>
+      <text x="16" y="73" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Leader Election enabled</text>
+      <text x="16" y="91" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Uncached Deployment reads</text>
+      <text x="16" y="109" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• CRD status subresource</text>
+      <text x="16" y="127" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Atomic patch with UID</text>
+    </g>
+
+    <!-- BOTTOM ROW: STORAGE & KUBERNETES -->
+    <!-- Postgres State -->
+    <g transform="translate(530, 240)">
+      <rect width="220" height="110" rx="10" fill="url(#boxGrad)" stroke="#10b981" stroke-width="1.5" filter="url(#boxShadow)"/>
+      <rect x="0" y="0" width="220" height="28" rx="10" fill="#059669" fill-opacity="0.15"/>
+      <text x="16" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#6ee7b7">POSTGRESQL PERSISTENCE</text>
+      
+      <text x="16" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">• State JSONB aggregate</text>
+      <text x="16" y="66" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">• Append-only rp_audit table</text>
+      <text x="16" y="84" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">• SQL Triggers block updates</text>
+    </g>
+
+    <!-- Kubernetes Target Cluster -->
+    <g transform="translate(840, 240)">
+      <rect width="210" height="110" rx="10" fill="url(#boxGrad)" stroke="#3b82f6" stroke-width="1.5" filter="url(#boxShadow)"/>
+      <rect x="0" y="0" width="210" height="28" rx="10" fill="#1d4ed8" fill-opacity="0.15"/>
+      <text x="16" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#93c5fd">KUBERNETES TARGETS</text>
+      
+      <text x="16" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">• CRD: ReliabilityTarget</text>
+      <text x="16" y="66" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">• Target Deployments</text>
+      <text x="16" y="84" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">• Scoped RBAC ServiceAccount</text>
+    </g>
+  </g>
+</svg>

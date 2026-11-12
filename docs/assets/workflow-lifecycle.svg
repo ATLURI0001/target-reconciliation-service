@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" width="100%" height="100%">
+  <defs>
+    <linearGradient id="wfBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="card1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="wfGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowSuccess" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1100" height="520" rx="16" fill="url(#wfBg)"/>
+
+  <!-- Title Block -->
+  <g transform="translate(50, 40)">
+    <text x="0" y="0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#38bdf8" letter-spacing="1.5">RECONCILIATION ENGINE</text>
+    <text x="0" y="28" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="26" font-weight="700" fill="#f8fafc">Policy-Governed Incident Lifecycle &amp; Rollback Flow</text>
+    <text x="0" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" fill="#94a3b8">From sustained unreadiness detection through atomic digest rollback and transactional verification.</text>
+  </g>
+
+  <!-- 4 Step Flow -->
+  <g transform="translate(50, 130)">
+    <!-- Connecting flow line -->
+    <path d="M 190 85 L 290 85" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+    <path d="M 470 85 L 570 85" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+    <path d="M 750 85 L 850 85" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowSuccess)"/>
+
+    <!-- STEP 1: DETECT -->
+    <g transform="translate(0, 0)">
+      <rect width="210" height="230" rx="12" fill="url(#card1Grad)" stroke="#ef4444" stroke-width="1.5" stroke-opacity="0.8" filter="url(#wfGlow)"/>
+      <rect x="0" y="0" width="210" height="38" rx="12" fill="#ef4444" fill-opacity="0.12"/>
+      <circle cx="24" cy="19" r="6" fill="#ef4444"/>
+      <text x="38" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#fca5a5">1. Sustained Failure</text>
+
+      <g transform="translate(16, 55)">
+        <text x="0" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#e2e8f0">Telemetry Telemetry</text>
+        <text x="0" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Freshness window: 30s</text>
+        <text x="0" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Rollout status unready</text>
+        <text x="0" y="64" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Replica disparity check</text>
+
+        <rect x="0" y="85" width="178" height="58" rx="6" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+        <text x="10" y="105" font-family="monospace" font-size="10" fill="#f87171">Status: Unready</text>
+        <text x="10" y="122" font-family="monospace" font-size="10" fill="#cbd5e1">avail: 0 / desired: 3</text>
+        <text x="10" y="136" font-family="monospace" font-size="9" fill="#71717a">dedup key: ep-9840</text>
+      </g>
+    </g>
+
+    <!-- STEP 2: PLAN & AUTHORIZE -->
+    <g transform="translate(280, 0)">
+      <rect width="210" height="230" rx="12" fill="url(#card1Grad)" stroke="#f59e0b" stroke-width="1.5" stroke-opacity="0.8" filter="url(#wfGlow)"/>
+      <rect x="0" y="0" width="210" height="38" rx="12" fill="#f59e0b" fill-opacity="0.12"/>
+      <circle cx="24" cy="19" r="6" fill="#f59e0b"/>
+      <text x="38" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#fde68a">2. Policy Gate</text>
+
+      <g transform="translate(16, 55)">
+        <text x="0" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#e2e8f0">Authorization Check</text>
+        <text x="0" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Dry-run default mode</text>
+        <text x="0" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• GitOps ownership fence</text>
+        <text x="0" y="64" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Explicit Operator approval</text>
+
+        <rect x="0" y="85" width="178" height="58" rx="6" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+        <text x="10" y="105" font-family="monospace" font-size="10" fill="#fbbf24">AwaitingApproval</text>
+        <text x="10" y="122" font-family="monospace" font-size="10" fill="#cbd5e1">role: trs_operator</text>
+        <text x="10" y="136" font-family="monospace" font-size="9" fill="#71717a">concurrency: 1/1</text>
+      </g>
+    </g>
+
+    <!-- STEP 3: ATOMIC ROLLBACK -->
+    <g transform="translate(560, 0)">
+      <rect width="210" height="230" rx="12" fill="url(#card1Grad)" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.8" filter="url(#wfGlow)"/>
+      <rect x="0" y="0" width="210" height="38" rx="12" fill="#38bdf8" fill-opacity="0.12"/>
+      <circle cx="24" cy="19" r="6" fill="#38bdf8"/>
+      <text x="38" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#bae6fd">3. Atomic Dispatch</text>
+
+      <g transform="translate(16, 55)">
+        <text x="0" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#e2e8f0">Precondition Patch</text>
+        <text x="0" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• UID + resourceVersion check</text>
+        <text x="0" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• sha256 digest pinned</text>
+        <text x="0" y="64" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Pod execution annotation</text>
+
+        <rect x="0" y="85" width="178" height="58" rx="6" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+        <text x="10" y="105" font-family="monospace" font-size="10" fill="#38bdf8">State: Executing</text>
+        <text x="10" y="122" font-family="monospace" font-size="10" fill="#cbd5e1">patch: image@sha256</text>
+        <text x="10" y="136" font-family="monospace" font-size="9" fill="#71717a">deadline: 120s limit</text>
+      </g>
+    </g>
+
+    <!-- STEP 4: VERIFY & AUDIT -->
+    <g transform="translate(840, 0)">
+      <rect width="210" height="230" rx="12" fill="url(#card1Grad)" stroke="#10b981" stroke-width="1.5" stroke-opacity="0.8" filter="url(#wfGlow)"/>
+      <rect x="0" y="0" width="210" height="38" rx="12" fill="#10b981" fill-opacity="0.12"/>
+      <circle cx="24" cy="19" r="6" fill="#10b981"/>
+      <text x="38" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#a7f3d0">4. Audit &amp; Verify</text>
+
+      <g transform="translate(16, 55)">
+        <text x="0" y="15" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" font-weight="600" fill="#e2e8f0">Closed-Loop Seal</text>
+        <text x="0" y="32" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• observedGeneration ready</text>
+        <text x="0" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• No surplus old pods</text>
+        <text x="0" y="64" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#94a3b8">• Immutable PG rp_audit log</text>
+
+        <rect x="0" y="85" width="178" height="58" rx="6" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+        <text x="10" y="105" font-family="monospace" font-size="10" fill="#34d399">State: Resolved</text>
+        <text x="10" y="122" font-family="monospace" font-size="10" fill="#cbd5e1">replicas: 3/3 ready</text>
+        <text x="10" y="136" font-family="monospace" font-size="9" fill="#71717a">audit sealed: seq 42</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Details Bar -->
+  <g transform="translate(50, 390)">
+    <rect width="1000" height="90" rx="10" fill="#111827" stroke="#1f2937" stroke-width="1"/>
+    
+    <g transform="translate(24, 20)">
+      <circle cx="10" cy="10" r="10" fill="#0284c7" fill-opacity="0.2"/>
+      <text x="8" y="14" font-family="monospace" font-size="11" font-weight="700" fill="#38bdf8">i</text>
+      <text x="30" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="700" fill="#f8fafc">Key Safety Guarantees</text>
+      
+      <text x="30" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" fill="#94a3b8">
+        • <tspan fill="#e2e8f0" font-weight="600">Deterministic Recovery Image:</tspan> Pinned by sha256 digest from ReliabilityTarget spec, never guessed.
+      </text>
+      <text x="30" y="56" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12" fill="#94a3b8">
+        • <tspan fill="#e2e8f0" font-weight="600">Concurrency &amp; Ownership Fences:</tspan> GitOps managed targets are rejected; maximum 1 simultaneous recovery per target.
+      </text>
+    </g>
+
+    <g transform="translate(700, 26)">
+      <rect width="270" height="42" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+      <text x="16" y="26" font-family="monospace" font-size="11" fill="#7dd3fc">CRD: ReliabilityTarget/v1alpha1</text>
+    </g>
+  </g>
+</svg>
