@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -49,6 +50,20 @@ func (o Observation) Healthy() bool {
 	return o.Desired > 0 && o.Replicas == o.Desired && o.Available >= o.Desired && o.Updated == o.Desired && o.ObservedGeneration >= o.Generation
 }
 
+// ParseTargetKey splits a "cluster/namespace/name" formatted target key into its components.
+func ParseTargetKey(key string) (cluster, namespace, name string, err error) {
+	parts := strings.Split(strings.TrimSpace(key), "/")
+	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+		return "", "", "", fmt.Errorf("%w: target key must follow cluster/namespace/name format", ErrInvalid)
+	}
+	return parts[0], parts[1], parts[2], nil
+}
+
+// TargetMatches checks whether the observation matches the specified cluster, namespace, and name.
+func (o Observation) TargetMatches(cluster, namespace, name string) bool {
+	return o.Cluster == cluster && o.Namespace == namespace && o.Name == name
+}
+
 type Plan struct {
 	Action           string      `json:"action"`
 	Reason           string      `json:"reason"`
@@ -69,6 +84,24 @@ type Incident struct {
 	ExecutionKey string    `json:"executionKey,omitempty"`
 	Deadline     time.Time `json:"deadline,omitempty"`
 	Error        string    `json:"error,omitempty"`
+}
+
+// IsTerminal returns true if the incident has reached a terminal state.
+func (i Incident) IsTerminal() bool {
+	switch i.State {
+	case "verified", "aborted", "timed_out", "rejected":
+		return true
+	default:
+		return false
+	}
+}
+
+// TimeRemaining returns the duration remaining until the incident deadline, or 0 if expired or not set.
+func (i Incident) TimeRemaining(now time.Time) time.Duration {
+	if i.Deadline.IsZero() || !now.Before(i.Deadline) {
+		return 0
+	}
+	return i.Deadline.Sub(now)
 }
 type Audit struct {
 	Sequence int       `json:"sequence"`
@@ -101,6 +134,12 @@ func (p Policy) Validate() error {
 }
 func DefaultPolicy() Policy {
 	return Policy{Namespaces: []string{"trs-demo"}, MaxReplicas: 3, MaxConcurrent: 1, FreshnessSeconds: 30, DetectionSeconds: 30, DryRun: true}
+}
+
+// Summary returns a concise diagnostic string representation of safety policy limits.
+func (p Policy) Summary() string {
+	return fmt.Sprintf("namespaces=%v, maxReplicas=%d, maxConcurrent=%d, freshness=%ds, detection=%ds, dryRun=%t, emergencyStop=%t",
+		p.Namespaces, p.MaxReplicas, p.MaxConcurrent, p.FreshnessSeconds, p.DetectionSeconds, p.DryRun, p.EmergencyStop)
 }
 
 type State struct {
