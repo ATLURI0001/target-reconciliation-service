@@ -197,7 +197,24 @@ func (a *API) auth(next func(http.ResponseWriter, *http.Request, core.Identity))
 		next(w, r, who)
 	}
 }
+// TotalRequests returns the total number of HTTP requests handled by the API.
+func (a *API) TotalRequests() uint64 {
+	return a.requests.Load()
+}
+
+// TotalFailures returns the total number of requests that resulted in 4xx or 5xx responses.
+func (a *API) TotalFailures() uint64 {
+	return a.failures.Load()
+}
+
 func decode(w http.ResponseWriter, r *http.Request, out any) bool {
+	if ct := r.Header.Get("Content-Type"); ct != "" {
+		mediaType := strings.ToLower(strings.TrimSpace(strings.Split(ct, ";")[0]))
+		if mediaType != "application/json" {
+			http.Error(w, "application/json required", http.StatusUnsupportedMediaType)
+			return false
+		}
+	}
 	r.Body = http.MaxBytesReader(w, r.Body, 16384)
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
