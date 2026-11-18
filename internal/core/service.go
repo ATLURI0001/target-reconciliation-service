@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -194,6 +195,10 @@ func (v *Service) SetPolicy(ctx context.Context, who Identity, p Policy) error {
 	return nil
 }
 func (v *Service) Approve(ctx context.Context, who Identity, incidentID string) error {
+	incidentID = strings.TrimSpace(incidentID)
+	if incidentID == "" {
+		return ErrInvalid
+	}
 	denied := false
 	err := v.Store.Update(ctx, func(s *State) error {
 		i, ok := s.Incidents[incidentID]
@@ -321,6 +326,10 @@ func (v *Service) Cancel(ctx context.Context, who Identity, incidentID string) e
 	return v.transition(ctx, who, incidentID, "Cancelled", "operator cancellation")
 }
 func (v *Service) transition(ctx context.Context, who Identity, incidentID, next, reason string) error {
+	incidentID = strings.TrimSpace(incidentID)
+	if incidentID == "" {
+		return ErrInvalid
+	}
 	denied := false
 	err := v.Store.Update(ctx, func(s *State) error {
 		i, ok := s.Incidents[incidentID]
