@@ -94,8 +94,8 @@ type Incident struct {
 
 // IsTerminal returns true if the incident has reached a terminal state.
 func (i Incident) IsTerminal() bool {
-	switch i.State {
-	case "verified", "aborted", "timed_out", "rejected":
+	switch strings.ToLower(strings.TrimSpace(i.State)) {
+	case "resolved", "cancelled", "failed", "rejected", "verified", "aborted", "timed_out":
 		return true
 	default:
 		return false

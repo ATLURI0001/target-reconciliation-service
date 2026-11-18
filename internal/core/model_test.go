@@ -103,7 +103,11 @@ func TestObservationTargetMatches(t *testing.T) {
 }
 
 func TestIncidentIsTerminalAndTimeRemaining(t *testing.T) {
-	terminalStates := []string{"verified", "aborted", "timed_out", "rejected"}
+	terminalStates := []string{
+		"verified", "aborted", "timed_out", "rejected",
+		"Resolved", "Cancelled", "Failed", "Rejected",
+		" resolved ", "FAILED",
+	}
 	for _, st := range terminalStates {
 		inc := core.Incident{State: st}
 		if !inc.IsTerminal() {
@@ -111,7 +115,7 @@ func TestIncidentIsTerminalAndTimeRemaining(t *testing.T) {
 		}
 	}
 
-	activeStates := []string{"detected", "pending_approval", "approved", "reconciling"}
+	activeStates := []string{"detected", "pending_approval", "approved", "reconciling", "Executing", "Verifying", "AwaitingApproval"}
 	for _, st := range activeStates {
 		inc := core.Incident{State: st}
 		if inc.IsTerminal() {
