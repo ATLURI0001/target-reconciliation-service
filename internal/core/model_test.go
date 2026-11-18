@@ -217,3 +217,69 @@ func TestPolicyAllowsNamespace(t *testing.T) {
 		t.Fatal("expected target-reconciliation-service to be rejected")
 	}
 }
+
+func TestObservationValidate(t *testing.T) {
+	valid := core.Observation{
+		Cluster:   "west-1",
+		Namespace: "trs-demo",
+		Name:      "web",
+		Desired:   2,
+		Replicas:  2,
+		Available: 2,
+		Updated:   2,
+	}
+	if err := valid.Validate(); err != nil {
+		t.Fatalf("expected valid observation to pass, got %v", err)
+	}
+
+	invalidCases := []struct {
+		name string
+		obs  core.Observation
+	}{
+		{"empty cluster", core.Observation{Cluster: "", Namespace: "demo", Name: "app"}},
+		{"whitespace cluster", core.Observation{Cluster: "   ", Namespace: "demo", Name: "app"}},
+		{"empty namespace", core.Observation{Cluster: "west-1", Namespace: "", Name: "app"}},
+		{"empty name", core.Observation{Cluster: "west-1", Namespace: "demo", Name: ""}},
+		{"negative desired", core.Observation{Cluster: "west-1", Namespace: "demo", Name: "app", Desired: -1}},
+		{"negative replicas", core.Observation{Cluster: "west-1", Namespace: "demo", Name: "app", Replicas: -2}},
+		{"negative available", core.Observation{Cluster: "west-1", Namespace: "demo", Name: "app", Available: -1}},
+		{"negative updated", core.Observation{Cluster: "west-1", Namespace: "demo", Name: "app", Updated: -1}},
+	}
+	for _, tc := range invalidCases {
+		if err := tc.obs.Validate(); err == nil {
+			t.Errorf("expected error for case %q, got nil", tc.name)
+		}
+	}
+}
+
+func TestPolicyAllowsReplicas(t *testing.T) {
+	p := core.Policy{MaxReplicas: 5}
+	if !p.AllowsReplicas(0) {
+		t.Error("expected 0 replicas to be allowed")
+	}
+	if !p.AllowsReplicas(5) {
+		t.Error("expected 5 replicas to be allowed")
+	}
+	if p.AllowsReplicas(6) {
+		t.Error("expected 6 replicas to exceed max")
+	}
+	if p.AllowsReplicas(-1) {
+		t.Error("expected negative replicas to be disallowed")
+	}
+}
+
+func TestStateActiveIncidents(t *testing.T) {
+	st := core.NewState()
+	if st.ActiveIncidents() != 0 {
+		t.Fatalf("expected 0 active incidents initially, got %d", st.ActiveIncidents())
+	}
+
+	st.Incidents["inc-1"] = core.Incident{ID: "inc-1", State: "pending_approval"}
+	st.Incidents["inc-2"] = core.Incident{ID: "inc-2", State: "resolved"}
+	st.Incidents["inc-3"] = core.Incident{ID: "inc-3", State: "reconciling"}
+	st.Incidents["inc-4"] = core.Incident{ID: "inc-4", State: "cancelled"}
+
+	if active := st.ActiveIncidents(); active != 2 {
+		t.Fatalf("expected 2 active incidents, got %d", active)
+	}
+}

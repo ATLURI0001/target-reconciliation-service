@@ -70,6 +70,23 @@ func (o Observation) TargetMatches(cluster, namespace, name string) bool {
 	return o.Cluster == cluster && o.Namespace == namespace && o.Name == name
 }
 
+// Validate checks whether the observation contains non-empty identifiers and non-negative counts.
+func (o Observation) Validate() error {
+	if strings.TrimSpace(o.Cluster) == "" {
+		return fmt.Errorf("%w: observation cluster cannot be empty", ErrInvalid)
+	}
+	if strings.TrimSpace(o.Namespace) == "" {
+		return fmt.Errorf("%w: observation namespace cannot be empty", ErrInvalid)
+	}
+	if strings.TrimSpace(o.Name) == "" {
+		return fmt.Errorf("%w: observation name cannot be empty", ErrInvalid)
+	}
+	if o.Desired < 0 || o.Replicas < 0 || o.Available < 0 || o.Updated < 0 {
+		return fmt.Errorf("%w: replica counts cannot be negative", ErrInvalid)
+	}
+	return nil
+}
+
 type Plan struct {
 	Action           string      `json:"action"`
 	Reason           string      `json:"reason"`
@@ -169,6 +186,11 @@ func (p Policy) Summary() string {
 		p.Namespaces, p.MaxReplicas, p.MaxConcurrent, p.FreshnessSeconds, p.DetectionSeconds, p.DryRun, p.EmergencyStop)
 }
 
+// AllowsReplicas reports whether the given replica count is non-negative and within the policy maximum.
+func (p Policy) AllowsReplicas(replicas int32) bool {
+	return replicas >= 0 && replicas <= p.MaxReplicas
+}
+
 type State struct {
 	Clusters       map[string]Cluster     `json:"clusters"`
 	Observations   map[string]Observation `json:"observations"`
@@ -176,6 +198,17 @@ type State struct {
 	Incidents      map[string]Incident    `json:"incidents"`
 	Audit          []Audit                `json:"audit"`
 	Policy         Policy                 `json:"policy"`
+}
+
+// ActiveIncidents returns the number of non-terminal incidents currently tracked in state.
+func (s State) ActiveIncidents() int {
+	var count int
+	for _, inc := range s.Incidents {
+		if !inc.IsTerminal() {
+			count++
+		}
+	}
+	return count
 }
 
 func NewState() State {
