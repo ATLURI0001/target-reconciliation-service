@@ -53,10 +53,16 @@ func (o Observation) Healthy() bool {
 // ParseTargetKey splits a "cluster/namespace/name" formatted target key into its components.
 func ParseTargetKey(key string) (cluster, namespace, name string, err error) {
 	parts := strings.Split(strings.TrimSpace(key), "/")
-	if len(parts) != 3 || parts[0] == "" || parts[1] == "" || parts[2] == "" {
+	if len(parts) != 3 {
 		return "", "", "", fmt.Errorf("%w: target key must follow cluster/namespace/name format", ErrInvalid)
 	}
-	return parts[0], parts[1], parts[2], nil
+	cluster = strings.TrimSpace(parts[0])
+	namespace = strings.TrimSpace(parts[1])
+	name = strings.TrimSpace(parts[2])
+	if cluster == "" || namespace == "" || name == "" {
+		return "", "", "", fmt.Errorf("%w: target key must follow cluster/namespace/name format", ErrInvalid)
+	}
+	return cluster, namespace, name, nil
 }
 
 // TargetMatches checks whether the observation matches the specified cluster, namespace, and name.
@@ -125,10 +131,16 @@ func (p Policy) Validate() error {
 	if len(p.Namespaces) == 0 || p.MaxReplicas < 1 || p.MaxConcurrent < 1 || p.MaxConcurrent > 10 || p.FreshnessSeconds < 5 || p.FreshnessSeconds > 300 || p.DetectionSeconds < 1 || p.DetectionSeconds > 86400 {
 		return fmt.Errorf("%w: invalid safety policy", ErrInvalid)
 	}
+	seen := make(map[string]bool, len(p.Namespaces))
 	for _, n := range p.Namespaces {
-		if n == "" || n == "default" || n == "kube-system" || n == "target-reconciliation-service" {
+		trimmed := strings.TrimSpace(n)
+		if trimmed == "" || trimmed == "default" || trimmed == "kube-system" || trimmed == "target-reconciliation-service" {
 			return fmt.Errorf("%w: protected namespace", ErrInvalid)
 		}
+		if seen[trimmed] {
+			return fmt.Errorf("%w: duplicate namespace %q", ErrInvalid, trimmed)
+		}
+		seen[trimmed] = true
 	}
 	return nil
 }
