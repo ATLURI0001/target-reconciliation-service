@@ -182,6 +182,34 @@ func TestRunArgs_ServerInteractions(t *testing.T) {
 		}
 	})
 
+	t.Run("policy empty file rejected", func(t *testing.T) {
+		tempDir := t.TempDir()
+		emptyFile := filepath.Join(tempDir, "empty_policy.json")
+		if err := os.WriteFile(emptyFile, []byte("   \t\n "), 0644); err != nil {
+			t.Fatalf("failed to write empty file: %v", err)
+		}
+
+		var out bytes.Buffer
+		err := runArgs([]string{"policy", emptyFile}, &out)
+		if err == nil || !strings.Contains(err.Error(), "policy file is empty") {
+			t.Fatalf("expected 'policy file is empty' error, got %v", err)
+		}
+	})
+
+	t.Run("policy invalid json rejected", func(t *testing.T) {
+		tempDir := t.TempDir()
+		invalidFile := filepath.Join(tempDir, "invalid.json")
+		if err := os.WriteFile(invalidFile, []byte("{not-valid-json}"), 0644); err != nil {
+			t.Fatalf("failed to write invalid file: %v", err)
+		}
+
+		var out bytes.Buffer
+		err := runArgs([]string{"policy", invalidFile}, &out)
+		if err == nil || !strings.Contains(err.Error(), "invalid policy JSON") {
+			t.Fatalf("expected 'invalid policy JSON' error, got %v", err)
+		}
+	})
+
 	t.Run("approve success", func(t *testing.T) {
 		var out bytes.Buffer
 		err := runArgs([]string{"approve", "inc-123"}, &out)

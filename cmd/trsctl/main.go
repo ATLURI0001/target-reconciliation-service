@@ -18,7 +18,7 @@ func request(args []string) error {
 }
 
 func runArgs(args []string, stdout io.Writer) error {
-	base := os.Getenv("TRS_API_URL")
+	base := strings.TrimSpace(os.Getenv("TRS_API_URL"))
 	if base == "" {
 		base = "http://127.0.0.1:8080"
 	}
@@ -49,11 +49,19 @@ func runArgs(args []string, stdout io.Writer) error {
 		if len(args) != 2 || strings.TrimSpace(args[1]) == "" {
 			return fmt.Errorf("policy requires JSON file")
 		}
+		policyPath := strings.TrimSpace(args[1])
 		method = "PUT"
 		path = "/v1/policy"
-		body, e = os.ReadFile(strings.TrimSpace(args[1]))
+		body, e = os.ReadFile(policyPath)
 		if e != nil {
 			return e
+		}
+		if len(bytes.TrimSpace(body)) == 0 {
+			return fmt.Errorf("policy file is empty")
+		}
+		var policyCheck any
+		if err := json.Unmarshal(body, &policyCheck); err != nil {
+			return fmt.Errorf("invalid policy JSON: %w", err)
 		}
 	case "approve", "cancel":
 		if len(args) != 2 || strings.TrimSpace(args[1]) == "" {
@@ -65,7 +73,7 @@ func runArgs(args []string, stdout io.Writer) error {
 	default:
 		return fmt.Errorf("unknown command")
 	}
-	token := os.Getenv("TRS_TOKEN")
+	token := strings.TrimSpace(os.Getenv("TRS_TOKEN"))
 	if token == "" {
 		return fmt.Errorf("set TRS_TOKEN (viewer for reads, operator for changes)")
 	}
