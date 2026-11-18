@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/ATLURI0001/target-reconciliation-service/internal/core"
@@ -44,7 +45,7 @@ func validateAudit(previous, next []core.Audit) error {
 		return ErrAuditMutation
 	}
 	for i := len(previous); i < len(next); i++ {
-		if next[i].Sequence != i+1 || next[i].At.IsZero() || next[i].Actor == "" || next[i].Action == "" {
+		if next[i].Sequence != i+1 || next[i].At.IsZero() || strings.TrimSpace(next[i].Actor) == "" || strings.TrimSpace(next[i].Action) == "" {
 			return fmt.Errorf("invalid audit entry at sequence %d", i+1)
 		}
 	}
