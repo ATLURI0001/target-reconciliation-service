@@ -45,6 +45,11 @@ func TestParseTargetKey(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "whitespace segment",
+			input:   "cluster-alpha/   /worker-deploy",
+			wantErr: true,
+		},
+		{
 			name:    "too many segments",
 			input:   "cluster-alpha/trs-demo/worker/extra",
 			wantErr: true,
@@ -146,5 +151,23 @@ func TestPolicySummary(t *testing.T) {
 	}
 	if !strings.Contains(summary, "dryRun=true") {
 		t.Fatalf("expected dryRun in summary, got %q", summary)
+	}
+}
+
+func TestPolicyValidateGuards(t *testing.T) {
+	p := core.DefaultPolicy()
+	p.Namespaces = []string{"   "}
+	if err := p.Validate(); err == nil {
+		t.Fatal("expected Validate to reject whitespace-only namespace")
+	}
+
+	p.Namespaces = []string{" kube-system "}
+	if err := p.Validate(); err == nil {
+		t.Fatal("expected Validate to reject padded protected namespace")
+	}
+
+	p.Namespaces = []string{"trs-demo", "trs-demo"}
+	if err := p.Validate(); err == nil {
+		t.Fatal("expected Validate to reject duplicate namespaces")
 	}
 }
