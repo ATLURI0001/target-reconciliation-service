@@ -122,10 +122,20 @@ func (a *API) Handler() http.Handler {
 		a.result(w, map[string]string{"result": "updated"}, a.Service.SetPolicy(r.Context(), who, p))
 	}))
 	m.HandleFunc("POST /v1/incidents/{id}/approve", a.auth(func(w http.ResponseWriter, r *http.Request, who core.Identity) {
-		a.result(w, map[string]string{"result": "evaluated"}, a.Service.Approve(r.Context(), who, r.PathValue("id")))
+		id := strings.TrimSpace(r.PathValue("id"))
+		if id == "" {
+			http.Error(w, "incident id required", 400)
+			return
+		}
+		a.result(w, map[string]string{"result": "evaluated"}, a.Service.Approve(r.Context(), who, id))
 	}))
 	m.HandleFunc("POST /v1/incidents/{id}/cancel", a.auth(func(w http.ResponseWriter, r *http.Request, who core.Identity) {
-		a.result(w, map[string]string{"result": "cancelled"}, a.Service.Cancel(r.Context(), who, r.PathValue("id")))
+		id := strings.TrimSpace(r.PathValue("id"))
+		if id == "" {
+			http.Error(w, "incident id required", 400)
+			return
+		}
+		a.result(w, map[string]string{"result": "cancelled"}, a.Service.Cancel(r.Context(), who, id))
 	}))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		a.requests.Add(1)

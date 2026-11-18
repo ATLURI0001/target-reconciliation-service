@@ -210,3 +210,14 @@ func TestPolicyValidation(t *testing.T) {
 		t.Fatal("protected namespace accepted")
 	}
 }
+
+func TestApproveAndCancel_BlankIDRejection(t *testing.T) {
+	s, _, _ := fixture(t)
+
+	if err := s.Approve(ctx, operator, "   "); !errors.Is(err, core.ErrInvalid) {
+		t.Fatalf("expected ErrInvalid for whitespace approve ID, got %v", err)
+	}
+	if err := s.Cancel(ctx, operator, ""); !errors.Is(err, core.ErrInvalid) {
+		t.Fatalf("expected ErrInvalid for empty cancel ID, got %v", err)
+	}
+}
