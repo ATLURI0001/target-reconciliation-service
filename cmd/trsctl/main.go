@@ -14,6 +14,10 @@ import (
 )
 
 func request(args []string) error {
+	return runArgs(args, os.Stdout)
+}
+
+func runArgs(args []string, stdout io.Writer) error {
 	base := os.Getenv("TRS_API_URL")
 	if base == "" {
 		base = "http://127.0.0.1:8080"
@@ -34,28 +38,30 @@ func request(args []string) error {
 	case "audit":
 		path = "/v1/audit"
 	case "register":
-		if len(args) != 2 {
+		if len(args) != 2 || strings.TrimSpace(args[1]) == "" {
 			return fmt.Errorf("register requires cluster ID")
 		}
+		clusterID := strings.TrimSpace(args[1])
 		method = "POST"
 		path = "/v1/clusters"
-		body, _ = json.Marshal(map[string]string{"id": args[1], "environment": "test"})
+		body, _ = json.Marshal(map[string]string{"id": clusterID, "environment": "test"})
 	case "policy":
-		if len(args) != 2 {
+		if len(args) != 2 || strings.TrimSpace(args[1]) == "" {
 			return fmt.Errorf("policy requires JSON file")
 		}
 		method = "PUT"
 		path = "/v1/policy"
-		body, e = os.ReadFile(args[1])
+		body, e = os.ReadFile(strings.TrimSpace(args[1]))
 		if e != nil {
 			return e
 		}
 	case "approve", "cancel":
-		if len(args) != 2 {
+		if len(args) != 2 || strings.TrimSpace(args[1]) == "" {
 			return fmt.Errorf("incident ID required")
 		}
+		incidentID := strings.TrimSpace(args[1])
 		method = "POST"
-		path = "/v1/incidents/" + url.PathEscape(args[1]) + "/" + args[0]
+		path = "/v1/incidents/" + url.PathEscape(incidentID) + "/" + args[0]
 	default:
 		return fmt.Errorf("unknown command")
 	}
@@ -82,7 +88,7 @@ func request(args []string) error {
 	if res.StatusCode >= 300 {
 		return fmt.Errorf("API returned HTTP %d: %s", res.StatusCode, string(data))
 	}
-	_, e = os.Stdout.Write(data)
+	_, e = stdout.Write(data)
 	return e
 }
 func main() {
