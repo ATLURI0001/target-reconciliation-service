@@ -25,10 +25,17 @@ func TestAPIAuthenticationAndAuditedAuthorization(t *testing.T) {
 		{"GET", "/healthz", "", "", 200}, {"GET", "/v1/snapshot", "", "", 401}, {"POST", "/v1/clusters", `{"id":"local","environment":"test"}`, view, 403}, {"POST", "/v1/clusters", `{"id":"local","environment":"test"}`, op, 200}, {"GET", "/v1/snapshot", "", view, 200}, {"POST", "/v1/clusters", `{"id":"bad","environment":"test","role":"operator"}`, op, 400}, {"POST", "/v1/clusters", `{"id":"bad","environment":"test"}garbage`, op, 400},
 		{"POST", "/v1/incidents/%20%20/approve", "", op, 400},
 		{"POST", "/v1/incidents/%20%20/cancel", "", op, 400},
+		{"GET", "/v1/snapshot", "", "bearer " + view, 200},
+		{"GET", "/v1/snapshot", "", "Bearer   " + view, 200},
+		{"GET", "/v1/audit?cursor=%200%20&limit=%2050%20", "", op, 200},
 	} {
 		r := httptest.NewRequest(tc.method, tc.path, strings.NewReader(tc.body))
 		if tc.token != "" {
-			r.Header.Set("Authorization", "Bearer "+tc.token)
+			if strings.HasPrefix(strings.ToLower(tc.token), "bearer ") {
+				r.Header.Set("Authorization", tc.token)
+			} else {
+				r.Header.Set("Authorization", "Bearer "+tc.token)
+			}
 		}
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, r)
