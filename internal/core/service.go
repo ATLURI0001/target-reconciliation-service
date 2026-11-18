@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"regexp"
-	"slices"
 	"strings"
 	"time"
 )
@@ -72,7 +71,7 @@ func allowed(s *State, o Observation, now time.Time) string {
 	if !ok || c.Environment != "test" {
 		return "unregistered or non-test cluster"
 	}
-	if !slices.Contains(p.Namespaces, o.Namespace) || o.Namespace == "kube-system" || o.Namespace == "default" || o.Namespace == "target-reconciliation-service" {
+	if !p.AllowsNamespace(o.Namespace) {
 		return "namespace not permitted"
 	}
 	if !o.OptIn || o.GitOps {
