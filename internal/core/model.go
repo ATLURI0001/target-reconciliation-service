@@ -148,6 +148,21 @@ func DefaultPolicy() Policy {
 	return Policy{Namespaces: []string{"trs-demo"}, MaxReplicas: 3, MaxConcurrent: 1, FreshnessSeconds: 30, DetectionSeconds: 30, DryRun: true}
 }
 
+// AllowsNamespace reports whether the given namespace is allowed under the policy
+// and is not a protected system namespace.
+func (p Policy) AllowsNamespace(ns string) bool {
+	clean := strings.TrimSpace(ns)
+	if clean == "" || clean == "default" || clean == "kube-system" || clean == "target-reconciliation-service" {
+		return false
+	}
+	for _, candidate := range p.Namespaces {
+		if strings.TrimSpace(candidate) == clean {
+			return true
+		}
+	}
+	return false
+}
+
 // Summary returns a concise diagnostic string representation of safety policy limits.
 func (p Policy) Summary() string {
 	return fmt.Sprintf("namespaces=%v, maxReplicas=%d, maxConcurrent=%d, freshness=%ds, detection=%ds, dryRun=%t, emergencyStop=%t",

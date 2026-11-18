@@ -175,3 +175,45 @@ func TestPolicyValidateGuards(t *testing.T) {
 		t.Fatal("expected Validate to reject duplicate namespaces")
 	}
 }
+
+func TestPolicyAllowsNamespace(t *testing.T) {
+	p := core.Policy{
+		Namespaces: []string{"trs-demo", "staging"},
+	}
+
+	// Allowed namespaces with and without whitespace
+	if !p.AllowsNamespace("trs-demo") {
+		t.Fatal("expected trs-demo to be allowed")
+	}
+	if !p.AllowsNamespace("  trs-demo  ") {
+		t.Fatal("expected padded trs-demo to be allowed")
+	}
+	if !p.AllowsNamespace("staging") {
+		t.Fatal("expected staging to be allowed")
+	}
+
+	// Disallowed namespaces
+	if p.AllowsNamespace("production") {
+		t.Fatal("expected unconfigured production to be disallowed")
+	}
+	if p.AllowsNamespace("") {
+		t.Fatal("expected empty namespace to be disallowed")
+	}
+	if p.AllowsNamespace("   ") {
+		t.Fatal("expected whitespace namespace to be disallowed")
+	}
+
+	// Protected namespaces must always be rejected even if configured
+	pProt := core.Policy{
+		Namespaces: []string{"kube-system", "default", "target-reconciliation-service"},
+	}
+	if pProt.AllowsNamespace("kube-system") {
+		t.Fatal("expected kube-system to be rejected")
+	}
+	if pProt.AllowsNamespace("default") {
+		t.Fatal("expected default to be rejected")
+	}
+	if pProt.AllowsNamespace("target-reconciliation-service") {
+		t.Fatal("expected target-reconciliation-service to be rejected")
+	}
+}
