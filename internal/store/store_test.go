@@ -94,6 +94,21 @@ func TestMemoryAuditAppendOnly(t *testing.T) {
 	if err := s.Update(ctx, func(st *core.State) error { st.Audit = nil; return nil }); !errors.Is(err, ErrAuditMutation) {
 		t.Fatalf("audit truncation: %v", err)
 	}
+
+	// Reject whitespace-only actor or action
+	if err := s.Update(ctx, func(st *core.State) error {
+		st.Audit = append(st.Audit, core.Audit{Sequence: 2, At: time.Now().UTC(), Actor: "   ", Action: "create"})
+		return nil
+	}); err == nil {
+		t.Fatal("expected error for whitespace-only audit actor")
+	}
+
+	if err := s.Update(ctx, func(st *core.State) error {
+		st.Audit = append(st.Audit, core.Audit{Sequence: 2, At: time.Now().UTC(), Actor: "alice", Action: "   "})
+		return nil
+	}); err == nil {
+		t.Fatal("expected error for whitespace-only audit action")
+	}
 }
 func TestPostgresIntegration(t *testing.T) {
 	dsn := os.Getenv("TEST_DATABASE_URL")
