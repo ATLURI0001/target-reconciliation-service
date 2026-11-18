@@ -55,17 +55,18 @@ func (a *API) Handler() http.Handler {
 	})
 	m.HandleFunc("GET /metrics", a.metrics)
 	m.HandleFunc("GET /v1/audit", a.auth(func(w http.ResponseWriter, r *http.Request, who core.Identity) {
-		cursor, err := strconv.Atoi(r.URL.Query().Get("cursor"))
-		if r.URL.Query().Get("cursor") == "" {
-			cursor = 0
-			err = nil
+		cursorRaw := strings.TrimSpace(r.URL.Query().Get("cursor"))
+		cursor := 0
+		var err error
+		if cursorRaw != "" {
+			cursor, err = strconv.Atoi(cursorRaw)
 		}
 		if err != nil || cursor < 0 {
 			http.Error(w, "invalid cursor", 400)
 			return
 		}
 		limit := 100
-		if raw := r.URL.Query().Get("limit"); raw != "" {
+		if raw := strings.TrimSpace(r.URL.Query().Get("limit")); raw != "" {
 			limit, err = strconv.Atoi(raw)
 		}
 		if err != nil || limit < 1 || limit > 200 {
@@ -178,12 +179,13 @@ func (a *API) Handler() http.Handler {
 }
 func (a *API) auth(next func(http.ResponseWriter, *http.Request, core.Identity)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
-		who := core.Identity{}
-		if r.Header.Get("Authorization") != "Bearer "+token {
+		parts := strings.Fields(r.Header.Get("Authorization"))
+		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
 			http.Error(w, "unauthorized", 401)
 			return
 		}
+		token := parts[1]
+		who := core.Identity{}
 		if equal(token, a.OperatorToken) {
 			who = core.Identity{Subject: "local-operator", Role: "operator"}
 		} else if equal(token, a.ViewerToken) {
